@@ -64,7 +64,7 @@ export default function HotelsClient({ initialHotels }: HotelsClientProps) {
 
             {/* Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {initialHotels.map((hotel) => {
+                {initialHotels.map((hotel: any) => {
                     const isBooked = trip.hotel?.id === hotel.id;
                     return (
                         <div key={hotel.id} className={`bg-white border-2 rounded-[32px] overflow-hidden transition-all duration-500 group flex flex-col h-full shadow-sm hover:shadow-2xl ${isBooked ? 'border-blue-500 ring-4 ring-blue-500/5' : 'border-gray-100'}`}>
@@ -152,7 +152,7 @@ export default function HotelsClient({ initialHotels }: HotelsClientProps) {
                                 { type: 'Deluxe Room', price: 1500000, desc: 'King bed, city view, 40sqm.' },
                                 { type: 'Premier Golf View', price: 2200000, desc: 'Overlooks the fairway, private balcony.' },
                                 { type: 'Executive Suite', price: 4500000, desc: 'Living area, marble bath, 80sqm.' }
-                            ].map((room) => (
+                            ].map((room: any) => (
                                 <button
                                     key={room.type}
                                     onClick={() => handleSelectRoom(selectedHotel, room.type, room.price)}

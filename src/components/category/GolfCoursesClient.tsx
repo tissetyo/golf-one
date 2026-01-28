@@ -64,7 +64,7 @@ export default function GolfCoursesClient({ initialCourses }: GolfCoursesClientP
 
             {/* Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {initialCourses.map((course) => {
+                {initialCourses.map((course: any) => {
                     const isBooked = trip.golf?.id === course.id;
                     return (
                         <div key={course.id} className={`bg-white border-2 rounded-[32px] overflow-hidden transition-all duration-500 group flex flex-col h-full shadow-sm hover:shadow-2xl ${isBooked ? 'border-emerald-500 ring-4 ring-emerald-500/5' : 'border-gray-100'}`}>
@@ -139,7 +139,7 @@ export default function GolfCoursesClient({ initialCourses }: GolfCoursesClientP
 
                         <div className="p-10 space-y-8 max-h-[60vh] overflow-y-auto">
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                                {['07:00 AM', '09:00 AM', '11:30 AM', '01:00 PM', '03:30 PM'].map((time) => (
+                                {['07:00 AM', '09:00 AM', '11:30 AM', '01:00 PM', '03:30 PM'].map((time: string) => (
                                     <button
                                         key={time}
                                         onClick={() => handleSelectSlot(selectedCourse, time, time, selectedCourse.price_range?.min || 1500000)}

@@ -60,7 +60,7 @@ export default function TravelClient({ initialPackages }: TravelClientProps) {
 
             {/* Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {initialPackages.map((pkg) => {
+                {initialPackages.map((pkg: any) => {
                     const isBooked = trip.travel?.id === pkg.id;
                     return (
                         <div key={pkg.id} className={`bg-white border-2 rounded-[32px] overflow-hidden transition-all duration-500 group flex flex-col h-full shadow-sm hover:shadow-2xl ${isBooked ? 'border-orange-500 ring-4 ring-orange-500/5' : 'border-gray-100'}`}>

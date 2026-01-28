@@ -43,7 +43,7 @@ const categories = [
 export default function CategoryCards() {
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {categories.map((cat) => (
+            {categories.map((cat: any) => (
                 <Link
                     key={cat.href}
                     href={cat.href}
