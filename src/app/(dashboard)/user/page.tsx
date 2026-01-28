@@ -1,14 +1,14 @@
 /**
- * User Dashboard Home (Light Mode)
+ * User Dashboard Home (Grab-Style Super App UX)
  * 
- * Central hub for golfers. 
- * Provides category-based entry points and featured content in a clean light theme.
+ * Central hub for golfers with a mobile-first density.
+ * Features icon-grid navigation, quick status bar, and featured recommendations.
  */
 
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import CategoryCards from '@/components/dashboard/CategoryCards';
-import { Trophy, Calendar, MapPin, ChevronRight, Star, Clock } from 'lucide-react';
+import ServiceGrid from '@/components/dashboard/ServiceGrid';
+import { Trophy, Calendar, MapPin, ChevronRight, Star, Search, Wallet, Bell, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
@@ -37,130 +37,132 @@ export default async function UserDashboardPage() {
         .limit(2);
 
     return (
-        <div className="min-h-screen bg-gray-50 text-gray-900">
-            {/* Top Banner / Header */}
-            <div className="relative h-80 bg-emerald-50 overflow-hidden border-b border-emerald-100 flex items-center">
-                <div className="absolute inset-0 opacity-40">
-                    <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_20%,rgba(16,185,129,0.1),transparent)]"></div>
-                    <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-emerald-200 rounded-full blur-[100px]"></div>
+        <div className="min-h-screen bg-white text-gray-900 pb-20">
+            {/* Grab-style Sticky Header */}
+            <header className="px-6 py-6 bg-emerald-600 text-white sticky top-0 z-30 shadow-lg">
+                <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full border-2 border-white/20 overflow-hidden bg-emerald-700 flex items-center justify-center font-black">
+                            {profile?.full_name?.[0] || 'U'}
+                        </div>
+                        <div>
+                            <p className="text-[10px] uppercase font-black tracking-widest opacity-80 leading-none mb-1 text-emerald-100">Welcome,</p>
+                            <p className="text-sm font-black leading-none">{profile?.full_name?.split(' ')[0] || 'Member'}</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <button className="p-2.5 bg-emerald-500/50 rounded-full hover:bg-emerald-500/80 transition-all border border-white/10">
+                            <Bell className="w-5 h-5" />
+                        </button>
+                        <button className="p-2.5 bg-emerald-500/50 rounded-full hover:bg-emerald-500/80 transition-all border border-white/10">
+                            <Bell className="w-5 h-5 opacity-0 absolute" /> {/* Placeholder for alignment */}
+                            <Sparkles className="w-5 h-5" />
+                        </button>
+                    </div>
                 </div>
 
-                <div className="relative max-w-7xl mx-auto px-6 w-full">
-                    <h1 className="text-5xl font-black mb-4 text-gray-900 leading-tight">
-                        Welcome back, <br />
-                        <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent underline decoration-emerald-200/40">{profile?.full_name?.split(' ')[0] || 'Golfer'}</span>!
-                    </h1>
-                    <p className="text-gray-500 max-w-xl text-lg font-medium leading-relaxed">
-                        Where would you like to play next? Browse our premier categories below or start a session with our AI Trip Planner.
-                    </p>
+                {/* Search Bar */}
+                <div className="relative group">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-300" />
+                    <input
+                        type="text"
+                        placeholder="Search Golf, Hotels & More..."
+                        className="w-full pl-11 pr-4 py-4 bg-emerald-500/50 border border-emerald-400/30 rounded-2xl text-sm placeholder:text-emerald-100/60 focus:outline-none focus:bg-white focus:text-gray-900 focus:ring-4 focus:ring-black/5 transition-all font-bold"
+                    />
+                </div>
+            </header>
+
+            {/* Quick Status Bar */}
+            <div className="px-5 -mt-4 relative z-40">
+                <div className="bg-white rounded-[32px] p-1 border border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.08)] flex items-center">
+                    <div className="flex-1 px-6 py-4 flex items-center gap-3 border-r border-gray-50">
+                        <div className="w-8 h-8 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600">
+                            <Wallet className="w-4 h-4" />
+                        </div>
+                        <div>
+                            <p className="text-[9px] font-black uppercase text-gray-400 tracking-tighter">Balance</p>
+                            <p className="text-xs font-black">Rp 12.5M</p>
+                        </div>
+                    </div>
+                    <div className="flex-1 px-6 py-4 flex items-center gap-3">
+                        <div className="w-8 h-8 bg-amber-50 rounded-full flex items-center justify-center text-amber-600">
+                            <Star className="w-4 h-4 fill-current text-amber-400" />
+                        </div>
+                        <div>
+                            <p className="text-[9px] font-black uppercase text-gray-400 tracking-tighter">Points</p>
+                            <p className="text-xs font-black">2,450</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <main className="max-w-7xl mx-auto px-6 -mt-16 pb-20 relative z-10">
-                {/* Large Category Cards */}
-                <section className="mb-20">
-                    <CategoryCards />
+            <main className="max-w-7xl mx-auto px-6 mt-12 space-y-12">
+                {/* Service Grid */}
+                <section>
+                    <ServiceGrid />
                 </section>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                    {/* Main Content Area */}
-                    <div className="lg:col-span-2 space-y-8">
-                        {/* Active Bookings Section */}
-                        <section>
-                            <div className="flex items-center justify-between mb-4">
-                                <h2 className="text-xl font-bold flex items-center gap-2">
-                                    <Calendar className="w-5 h-5 text-emerald-600" />
-                                    Your Active Bookings
-                                </h2>
-                                <Link href="/user/bookings" className="text-sm text-emerald-600 font-bold hover:underline">View All</Link>
-                            </div>
+                {/* Promo Banner Section */}
+                <section>
+                    <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-[32px] p-8 text-white relative overflow-hidden shadow-xl shadow-indigo-900/10 group">
+                        <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl transition-transform group-hover:scale-125 duration-700"></div>
+                        <div className="relative z-10">
+                            <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-lg text-[10px] font-black uppercase tracking-widest leading-none mb-4 inline-block border border-white/10">Limited Offer</span>
+                            <h2 className="text-2xl font-black mb-2 leading-tight">Weekend Luxury <br /> Bali Getaway - 40% OFF</h2>
+                            <p className="text-indigo-100 text-sm mb-6 font-medium max-w-[200px]">Book before Monday to save up to Rp 5M on your next trip.</p>
+                            <Link href="/user/hotels" className="inline-flex items-center gap-2 px-6 py-3 bg-white text-indigo-900 rounded-xl font-black text-xs uppercase tracking-tight hover:shadow-lg transition-all active:scale-95">
+                                Book Now <ChevronRight className="w-4 h-4" />
+                            </Link>
+                        </div>
+                    </div>
+                </section>
 
-                            {bookings && bookings.length > 0 ? (
-                                <div className="grid gap-4">
-                                    {bookings.map((booking: any) => (
-                                        <BookingCard key={booking.id} booking={booking} />
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="p-8 bg-white rounded-3xl border border-dashed border-gray-200 text-center shadow-sm">
-                                    <Calendar className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                                    <p className="text-gray-500 font-medium">No active bookings found.</p>
-                                    <Link href="/user/golf" className="text-emerald-600 text-sm font-bold mt-2 block">Start exploring →</Link>
-                                </div>
-                            )}
-                        </section>
-
-                        {/* Featured Recommendations */}
-                        <section>
-                            <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-                                <Star className="w-5 h-5 text-yellow-500" />
-                                Featured for You
-                            </h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <FeaturedCard
-                                    title="Bali National Golf Club"
-                                    location="Nusa Dua, Bali"
-                                    rating={4.8}
-                                    price="Rp 2.500.000"
-                                    type="golf"
-                                />
-                                <FeaturedCard
-                                    title="The St. Regis Bali Resort"
-                                    location="Nusa Dua, Bali"
-                                    rating={5.0}
-                                    price="Rp 8.000.000"
-                                    type="hotel"
-                                />
-                            </div>
-                        </section>
+                {/* My Trips Area */}
+                <section>
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-xl font-black flex items-center gap-2 text-gray-900">
+                            <Calendar className="w-6 h-6 text-emerald-600" />
+                            Active Bookings
+                        </h2>
+                        <Link href="/user/bookings" className="text-[10px] font-black uppercase tracking-widest text-emerald-600">View History</Link>
                     </div>
 
-                    {/* Sidebar Area */}
-                    <div className="space-y-8">
-                        {/* AI Assistant Quick Tool */}
-                        <div className="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-3xl p-8 shadow-xl shadow-emerald-900/10 relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-12 -mt-12 transition-transform group-hover:scale-110"></div>
-                            <div className="relative">
-                                <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-md">
-                                    <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                                    </svg>
-                                </div>
-                                <h3 className="text-xl font-bold mb-2 text-white">Need a full plan?</h3>
-                                <p className="text-emerald-100/90 text-sm mb-6 font-medium">
-                                    Our AI can organize your entire trip—golf, hotels, and transport—in one go.
-                                </p>
-                                <Link
-                                    href="/user/ai-assistant"
-                                    className="inline-flex items-center gap-2 px-6 py-3 bg-white text-emerald-900 rounded-xl font-black text-sm uppercase tracking-tight hover:shadow-lg transition-all"
-                                >
-                                    Start Agent
-                                    <ChevronRight className="w-4 h-4" />
-                                </Link>
-                            </div>
+                    {bookings && bookings.length > 0 ? (
+                        <div className="grid gap-4">
+                            {bookings.map((booking: any) => (
+                                <BookingCard key={booking.id} booking={booking} />
+                            ))}
                         </div>
+                    ) : (
+                        <div className="p-10 bg-gray-50 rounded-[32px] border border-dashed border-gray-200 text-center flex flex-col items-center">
+                            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4 border border-gray-100">
+                                <Calendar className="w-8 h-8 text-gray-200" />
+                            </div>
+                            <p className="text-gray-400 font-bold mb-2">No active bookings</p>
+                            <p className="text-xs text-gray-400 mb-6 max-w-[200px]">Start your golf journey by exploring world-class courses.</p>
+                            <Link href="/user/golf" className="text-xs font-black uppercase tracking-widest text-emerald-600 px-6 py-3 bg-emerald-50 rounded-xl hover:bg-emerald-100 transition-colors">Find a Course</Link>
+                        </div>
+                    )}
+                </section>
 
-                        {/* Recent Best Scores */}
-                        <div className="bg-white rounded-3xl border border-gray-200 p-8 shadow-sm">
-                            <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-                                <Trophy className="w-5 h-5 text-yellow-500" />
-                                Your Best Rounds
-                            </h3>
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl border border-gray-100">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center font-bold text-emerald-600 text-sm">#1</div>
-                                        <div>
-                                            <p className="text-sm font-bold">Bali National</p>
-                                            <p className="text-[10px] text-gray-500 uppercase font-black">85 Strokes</p>
-                                        </div>
-                                    </div>
-                                    <Clock className="w-4 h-4 text-gray-400" />
+                {/* Best Rounds Area */}
+                <div className="bg-emerald-50/50 rounded-[40px] p-8 border border-emerald-100/50">
+                    <h3 className="text-lg font-black mb-6 flex items-center gap-3 text-emerald-900">
+                        <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-emerald-100">
+                            <Trophy className="w-5 h-5 text-amber-500" />
+                        </div>
+                        Your Best Performance
+                    </h3>
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between p-5 bg-white rounded-3xl border border-emerald-100/50 shadow-sm">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-emerald-500 text-white rounded-2xl flex items-center justify-center font-black text-sm italic">#1</div>
+                                <div>
+                                    <p className="text-sm font-black text-gray-900">Bali National Golf</p>
+                                    <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">85 Strokes • Nusa Dua</p>
                                 </div>
                             </div>
-                            <Link href="/scores" className="mt-8 pt-4 border-t border-gray-100 block text-center text-xs font-black uppercase text-gray-400 hover:text-emerald-600 transition-colors">
-                                View Score Stats
-                            </Link>
+                            <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full uppercase tracking-widest">Master</span>
                         </div>
                     </div>
                 </div>
@@ -177,55 +179,25 @@ function BookingCard({ booking }: { booking: any }) {
     };
 
     return (
-        <div className="group p-6 bg-white border border-gray-200 rounded-2xl hover:border-emerald-200 transition-all cursor-pointer shadow-sm hover:shadow-md">
+        <div className="p-6 bg-white border border-gray-100 rounded-[32px] hover:border-emerald-200 transition-all cursor-pointer shadow-sm hover:shadow-xl group">
             <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                    <div className="p-3 bg-emerald-50 rounded-xl">
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
                         {booking.booking_type === 'golf' ? <Trophy className="w-5 h-5 text-emerald-600" /> : <Calendar className="w-5 h-5 text-emerald-600" />}
                     </div>
                     <div>
-                        <p className="font-bold capitalize text-gray-800">{booking.booking_type} Trip</p>
-                        <p className="text-xs text-gray-500">{new Date(booking.created_at).toLocaleDateString()}</p>
+                        <p className="font-black capitalize text-gray-900 text-sm tracking-tight">{booking.booking_type} Trip</p>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{new Date(booking.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</p>
                     </div>
                 </div>
-                <span className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-black border ${statusColors[booking.status] || 'bg-gray-100 text-gray-400 border-gray-200'}`}>
+                <span className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border ${statusColors[booking.status] || 'bg-gray-50 text-gray-400 border-gray-100'}`}>
                     {booking.status.replace('_', ' ')}
                 </span>
             </div>
-            <div className="flex items-center justify-between pt-2 border-t border-gray-100 group-hover:border-emerald-50">
-                <p className="text-sm font-black text-gray-900">Rp {Number(booking.total_amount).toLocaleString()}</p>
-                <span className="text-xs text-gray-400 font-bold group-hover:text-emerald-600 flex items-center gap-1 transition-colors">
-                    Details <ChevronRight className="w-3 h-3" />
-                </span>
-            </div>
-        </div>
-    );
-}
-
-function FeaturedCard({ title, location, rating, price, type }: any) {
-    return (
-        <div className="bg-white border border-gray-200 hover:border-emerald-300 rounded-3xl overflow-hidden cursor-pointer group shadow-sm hover:shadow-md transition-all">
-            <div className="h-40 bg-gray-100 relative">
-                <div className="absolute top-4 left-4 z-10 px-3 py-1 bg-white/80 backdrop-blur-md rounded-lg text-[10px] font-black uppercase text-gray-600 border border-gray-200 shadow-sm">
-                    Featured {type}
-                </div>
-            </div>
-            <div className="p-6">
-                <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-bold text-gray-800 group-hover:text-emerald-600 transition-colors">{title}</h3>
-                    <div className="flex items-center gap-1 text-yellow-500">
-                        <Star className="w-3 h-3 fill-current" />
-                        <span className="text-xs font-bold">{rating}</span>
-                    </div>
-                </div>
-                <p className="text-xs text-gray-500 flex items-center gap-1 mb-4">
-                    <MapPin className="w-3 h-3" /> {location}
-                </p>
-                <div className="flex items-center justify-between">
-                    <span className="text-sm font-black text-emerald-600">{price}</span>
-                    <button className="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-emerald-600 transition-colors">
-                        Book Now
-                    </button>
+            <div className="flex items-center justify-between pt-4 border-t border-gray-50">
+                <p className="text-base font-black text-gray-900 tracking-tight">Rp {Number(booking.total_amount).toLocaleString()}</p>
+                <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 opacity-0 group-hover:opacity-100 transition-all">
+                    <ChevronRight className="w-4 h-4" />
                 </div>
             </div>
         </div>
