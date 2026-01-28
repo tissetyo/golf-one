@@ -14,6 +14,8 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
 export default function CheckoutPage() {
     const supabase = createClient();
     const { trip, totalPrice, clearTrip } = useBooking();

@@ -14,6 +14,8 @@ import { getLocalScores, saveScoreLocally, syncScores, updateHoleScore, createSc
 import { createClient } from '@/lib/supabase/client';
 import type { GolfScore, Profile } from '@/types';
 
+export const dynamic = 'force-dynamic';
+
 export default function ScoreTrackerPage() {
     const router = useRouter();
     const [profile, setProfile] = useState<Profile | null>(null);
