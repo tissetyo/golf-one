@@ -1,11 +1,11 @@
 /**
- * Gemini AI Agent
+ * DeepSeek AI Agent
  * 
- * Core AI agent logic for conversational booking using Google's Gemini API.
+ * Core AI agent logic for conversational booking using DeepSeek's API.
+ * Uses a standard OpenAI-compatible fetch interface for high reliability.
  * Handles recommendations, vendor swapping, and conversation memory.
  */
 
-import { GoogleGenerativeAI, Content, Part } from '@google/generative-ai';
 import type {
     ChatMessage,
     Recommendation,
@@ -14,16 +14,6 @@ import type {
     Hotel,
     TravelPackage
 } from '@/types';
-
-// Initialize Gemini AI helper
-function getGenAI() {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-        console.error('CRITICAL: GEMINI_API_KEY is missing from environment variables.');
-        throw new Error('Gemini API key not configured');
-    }
-    return new GoogleGenerativeAI(apiKey);
-}
 
 // System prompt for the golf tourism assistant
 const SYSTEM_PROMPT = `You are a friendly and knowledgeable Golf Tourism Assistant. You are part of an integrated app where users can browse Golf Courses, Hotels, and Travel Packages manually, or ask you for intelligent end-to-end planning.
@@ -48,17 +38,27 @@ For booking, collect:
 Always format recommendations clearly so they can be parsed into visual cards by the frontend. Include Name, Price, Rating, and Proximity.`;
 
 /**
- * Format chat history for Gemini API
+ * Format chat history for DeepSeek (OpenAI compatible)
  */
-function formatChatHistory(messages: ChatMessage[]): Content[] {
-    return messages.map((msg) => ({
-        role: msg.role === 'user' ? 'user' : 'model',
-        parts: [{ text: msg.content }] as Part[],
-    }));
+function formatMessages(userMessage: string, history: ChatMessage[], systemContext: string) {
+    const messages = [
+        { role: 'system', content: systemContext },
+        ...history.map(msg => ({
+            role: msg.role === 'user' ? 'user' : 'assistant',
+            content: msg.content
+        }))
+    ];
+
+    // Add the latest message if not already in history
+    if (history.length === 0 || history[history.length - 1].content !== userMessage) {
+        messages.push({ role: 'user', content: userMessage });
+    }
+
+    return messages;
 }
 
 /**
- * Generate AI response using Gemini
+ * Generate AI response using DeepSeek
  */
 export async function generateAIResponse(
     userMessage: string,
@@ -71,7 +71,11 @@ export async function generateAIResponse(
     }
 ): Promise<{ response: string; recommendations?: Recommendation[]; updatedContext?: Partial<ConversationContext> }> {
     try {
-        const model = getGenAI().getGenerativeModel({ model: 'gemini-1.5-flash' });
+        const apiKey = process.env.DEEPSEEK_API_KEY;
+        if (!apiKey) {
+            console.error('CRITICAL: DEEPSEEK_API_KEY is missing from environment variables.');
+            throw new Error('DeepSeek API key not configured');
+        }
 
         // Build context-aware prompt
         let contextInfo = '';
@@ -93,44 +97,49 @@ export async function generateAIResponse(
             }
         }
 
-        // Start chat with system context
-        const chat = model.startChat({
-            history: [
-                {
-                    role: 'user',
-                    parts: [{ text: `System context: ${SYSTEM_PROMPT}${contextInfo}` }],
-                },
-                {
-                    role: 'model',
-                    parts: [{ text: 'I understand. I\'m ready to help with golf tourism bookings and recommendations.' }],
-                },
-                ...formatChatHistory(conversationHistory),
-            ],
+        const fullSystemPrompt = `${SYSTEM_PROMPT}${contextInfo}`;
+        const messages = formatMessages(userMessage, conversationHistory, fullSystemPrompt);
+
+        // Fetch from DeepSeek API
+        const response = await fetch('https://api.deepseek.com/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: 'deepseek-chat',
+                messages: messages,
+                stream: false
+            })
         });
 
-        // Generate response
-        const result = await chat.sendMessage(userMessage);
-        const response = result.response.text();
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`DeepSeek API error (${response.status}): ${errorText}`);
+        }
+
+        const data = await response.json();
+        const aiText = data.choices[0].message.content;
 
         // Extract recommendations if present in response
-        const recommendations = extractRecommendations(response, availableData);
+        const recommendations = extractRecommendations(aiText, availableData);
 
         // Update context based on conversation
-        const updatedContext = updateContextFromConversation(userMessage, response, context);
+        const updatedContext = updateContextFromConversation(userMessage, aiText, context);
 
         return {
-            response,
+            response: aiText,
             recommendations: recommendations.length > 0 ? recommendations : undefined,
             updatedContext,
         };
     } catch (error: any) {
-        console.error('Gemini AI Error Detailed:', {
+        console.error('DeepSeek AI Error Detailed:', {
             message: error.message,
             stack: error.stack,
-            cause: error.cause
         });
         return {
-            response: `I apologize, but I'm having trouble processing your request right now. (Error: ${error.message || 'Unknown'}). Please check system logs for details.`,
+            response: `I apologize, but I'm having trouble processing your request via DeepSeek. (Error: ${error.message || 'Unknown'}). Please ensure your DEEPSEEK_API_KEY is valid and has credits.`,
         };
     }
 }
@@ -177,7 +186,7 @@ function extractRecommendations(
                 item_id: hotel.id,
                 name: hotel.name,
                 description: hotel.description || '',
-                price: 0, // Would need room prices
+                price: 0,
                 rating: hotel.star_rating || 0,
                 image_url: hotel.images?.[0],
                 category: 'rating',
@@ -204,7 +213,7 @@ function extractRecommendations(
 }
 
 /**
- * Determine recommendation category based on item properties
+ * Determine recommendation category
  */
 function determineCategory(item: GolfCourse): 'price' | 'rating' | 'proximity' {
     if (item.rating && item.rating >= 4.5) return 'rating';
@@ -239,72 +248,12 @@ function updateContextFromConversation(
         }
     }
 
-    // Extract player count
-    const playerMatch = messageLower.match(/(\d+)\s*(?:players?|people|guests?|persons?)/);
-    if (playerMatch) {
-        updates.preferences_extracted = {
-            ...currentContext.preferences_extracted,
-        };
-    }
-
     // Detect booking stage
     if (messageLower.includes('book') || messageLower.includes('reserve')) {
         updates.booking_stage = 'selecting';
     } else if (messageLower.includes('confirm') || messageLower.includes('yes')) {
         updates.booking_stage = 'confirming';
-    } else if (messageLower.includes('pay')) {
-        updates.booking_stage = 'paying';
     }
 
     return updates;
-}
-
-/**
- * Get categorized recommendations
- */
-export async function getCategorizedRecommendations(
-    type: 'golf' | 'hotel' | 'travel',
-    category: 'price' | 'rating' | 'proximity',
-    userLocation?: { lat: number; lng: number },
-    limit: number = 5
-): Promise<Recommendation[]> {
-    // This would query Supabase for items sorted by the category
-    // For now, return empty array - will be implemented with Supabase queries
-    return [];
-}
-
-/**
- * Handle vendor swapping in a booking
- */
-export async function swapVendor(
-    currentBooking: ConversationContext['current_booking'],
-    itemType: 'golf' | 'hotel' | 'travel',
-    newItemId: string
-): Promise<ConversationContext['current_booking']> {
-    if (!currentBooking) return undefined;
-
-    const updatedBooking = { ...currentBooking };
-
-    switch (itemType) {
-        case 'golf':
-            updatedBooking.golf = {
-                ...updatedBooking.golf,
-                course_id: newItemId,
-            } as typeof updatedBooking.golf;
-            break;
-        case 'hotel':
-            updatedBooking.hotel = {
-                ...updatedBooking.hotel,
-                hotel_id: newItemId,
-            } as typeof updatedBooking.hotel;
-            break;
-        case 'travel':
-            updatedBooking.travel = {
-                ...updatedBooking.travel,
-                package_id: newItemId,
-            } as typeof updatedBooking.travel;
-            break;
-    }
-
-    return updatedBooking;
 }
