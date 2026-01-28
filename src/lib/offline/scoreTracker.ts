@@ -15,8 +15,13 @@ const SCORES_STORAGE_KEY = 'golf_scores_offline';
  */
 export function getLocalScores(): GolfScore[] {
     if (typeof window === 'undefined') return [];
-    const stored = localStorage.getItem(SCORES_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
+    try {
+        const stored = localStorage.getItem(SCORES_STORAGE_KEY);
+        return stored ? JSON.parse(stored) : [];
+    } catch (err) {
+        console.error('Failed to parse local scores:', err);
+        return [];
+    }
 }
 
 /**

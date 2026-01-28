@@ -40,13 +40,23 @@ export default function ScoreTrackerPage() {
                 return;
             }
 
-            const { data: prof } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', user.id)
-                .single();
+            try {
+                const { data: prof, error: profError } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
 
-            setProfile(prof);
+                if (profError) {
+                    console.warn('Profile fetch error, using auth user data:', profError);
+                    setProfile({ id: user.id, email: user.email } as any);
+                } else {
+                    setProfile(prof);
+                }
+            } catch (err) {
+                console.error('Data load exception:', err);
+            }
+
             setScores(getLocalScores());
         };
 
@@ -73,12 +83,22 @@ export default function ScoreTrackerPage() {
      * Start a new round
      */
     const startNewRound = () => {
-        if (!profile) return;
-        // For MVP, we use a placeholder course ID or pick the first one
-        const newScore = createScoreCard(profile.id, 'placeholder-course-id');
-        setActiveScore(newScore);
-        saveScoreLocally(newScore);
-        setScores(getLocalScores());
+        console.log('Starting new round... Profile state:', profile);
+        if (!profile) {
+            alert('Your profile is still loading. Please wait a moment.');
+            return;
+        }
+
+        try {
+            const newScore = createScoreCard(profile.id, 'placeholder-course-id');
+            console.log('Created score card:', newScore);
+            setActiveScore(newScore);
+            saveScoreLocally(newScore);
+            setScores(getLocalScores());
+        } catch (err) {
+            console.error('Failed to create new round:', err);
+            alert('Error creating game session.');
+        }
     };
 
     /**
