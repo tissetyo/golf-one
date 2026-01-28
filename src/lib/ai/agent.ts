@@ -71,7 +71,7 @@ export async function generateAIResponse(
     }
 ): Promise<{ response: string; recommendations?: Recommendation[]; updatedContext?: Partial<ConversationContext> }> {
     try {
-        const model = getGenAI().getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
+        const model = getGenAI().getGenerativeModel({ model: 'gemini-1.5-flash' });
 
         // Build context-aware prompt
         let contextInfo = '';
