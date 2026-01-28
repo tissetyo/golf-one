@@ -1,13 +1,13 @@
 # 🏌️‍♂️ Golf Tourism Platform (AI-Powered)
 
-A premium, full-stack Golf Tourism platform built with **Next.js 16**, **Supabase**, and **Google Gemini AI**. Designed to provide a seamless booking experience for golfers while offering robust management tools for courses, hotels, and travel vendors.
+A premium, full-stack Golf Tourism platform built with **Next.js 16**, **Supabase**, and **DeepSeek AI**. Designed to provide a seamless booking experience for golfers while offering robust management tools for courses, hotels, and travel vendors.
 
 ## ✨ Features
 
 ### 🌈 User Experience
 *   **High-Impact Light Mode**: A clean, premium emerald-themed UI designed for clarity and elegance.
 *   **Card-Based Discovery**: Navigate through large, interactive category cards for Golf, Hotels, and Travel.
-*   **AI Concierge**: A full-screen AI assistant that can plan and book your entire trip conversationally using Gemini 1.5 Flash.
+*   **AI Concierge**: A full-screen AI assistant that can plan and book your entire trip conversationally using DeepSeek-V3.
 *   **Manual Trip Builder**: Persistent "Trip Summary" bar allows users to select items across categories and review them in a unified checkout.
 
 ### 🏨 Vendor & Admin Ecosystem (7 Dashboards)
@@ -27,7 +27,7 @@ A premium, full-stack Golf Tourism platform built with **Next.js 16**, **Supabas
 ## 🛠️ Tech Stack
 *   **Frontend**: Next.js 16 (App Router), Tailwind CSS, Lucide Icons.
 *   **Backend**: Supabase (Database, Auth, RLS).
-*   **AI**: Google Generative AI (Gemini 1.5 Flash).
+*   **AI**: DeepSeek AI (OpenAI-compatible).
 *   **Payments**: Xendit Node SDK.
 *   **Cloud**: Vercel.
 
@@ -45,7 +45,7 @@ A premium, full-stack Golf Tourism platform built with **Next.js 16**, **Supabas
     ```env
     NEXT_PUBLIC_SUPABASE_URL=...
     NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-    GEMINI_API_KEY=...
+    DEEPSEEK_API_KEY=...
     XENDIT_SECRET_KEY=...
     ```
 
