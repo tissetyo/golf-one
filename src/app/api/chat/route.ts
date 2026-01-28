@@ -14,6 +14,14 @@ export async function POST(request: NextRequest) {
     try {
         const supabase = await createClient();
 
+        if (!supabase.auth) {
+            console.error('CRITICAL: Supabase client initialization failed. Check environment variables.');
+            return NextResponse.json(
+                { success: false, error: 'Database configuration missing. Please check NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY on Vercel.' },
+                { status: 500 }
+            );
+        }
+
         // Get authenticated user
         const { data: { user }, error: authError } = await supabase.auth.getUser();
         if (authError || !user) {

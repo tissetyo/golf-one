@@ -15,8 +15,15 @@ import type {
     TravelPackage
 } from '@/types';
 
-// Initialize Gemini AI client
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+// Initialize Gemini AI helper
+function getGenAI() {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+        console.error('CRITICAL: GEMINI_API_KEY is missing from environment variables.');
+        throw new Error('Gemini API key not configured');
+    }
+    return new GoogleGenerativeAI(apiKey);
+}
 
 // System prompt for the golf tourism assistant
 const SYSTEM_PROMPT = `You are a friendly and knowledgeable Golf Tourism Assistant. You are part of an integrated app where users can browse Golf Courses, Hotels, and Travel Packages manually, or ask you for intelligent end-to-end planning.
@@ -64,7 +71,7 @@ export async function generateAIResponse(
     }
 ): Promise<{ response: string; recommendations?: Recommendation[]; updatedContext?: Partial<ConversationContext> }> {
     try {
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
+        const model = getGenAI().getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
 
         // Build context-aware prompt
         let contextInfo = '';
@@ -116,10 +123,14 @@ export async function generateAIResponse(
             recommendations: recommendations.length > 0 ? recommendations : undefined,
             updatedContext,
         };
-    } catch (error) {
-        console.error('Gemini AI Error:', error);
+    } catch (error: any) {
+        console.error('Gemini AI Error Detailed:', {
+            message: error.message,
+            stack: error.stack,
+            cause: error.cause
+        });
         return {
-            response: 'I apologize, but I\'m having trouble processing your request right now. Please try again in a moment.',
+            response: `I apologize, but I'm having trouble processing your request right now. (Error: ${error.message || 'Unknown'}). Please check system logs for details.`,
         };
     }
 }
