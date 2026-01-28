@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Golf Tourism Platform ⛳🏨🚗
 
-## Getting Started
+A premium, full-stack Golf Tourism Platform built with **Next.js 16**, **Supabase**, **Xendit**, and **Google Gemini AI**.
 
-First, run the development server:
+## 🌟 Key Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **AI-Powered Conversational Booking**: Plan your entire trip by chatting with our Gemini AI agent.
+- **Multi-Vendor Ecosystem**: Unified booking flow for Golf Courses, Hotels, and Travel Packages.
+- **Offline-First PWA**: Track your golf scores even without an internet connection; syncs automatically when online.
+- **Role-Based Dashboards**:
+  - **Admin**: Revenue analytics, user management, and manual split-settlement tracking.
+  - **Golf Vendor**: Tee time management, caddie logs, and real-time score viewing.
+  - **Hotel Vendor**: Room inventory and availability management.
+  - **Travel Vendor**: Package and fleet operations.
+- **Secure Payments**: Integrated with Xendit for Invoices (VA, QRIS, e-Wallets).
+
+## 🛠 Tech Stack
+
+- **Frontend**: Next.js 16 (App Router), Tailwind CSS, Lucide Icons.
+- **Backend**: Next.js Server Actions & API Routes (Edge-ready).
+- **Database/Auth**: Supabase (PostgreSQL, RLS, Auth).
+- **AI**: Google Generative AI (Gemini 1.5 Flash).
+- **Payments**: Xendit Node SDK.
+- **PWA**: `@ducanh2912/next-pwa`.
+
+## 🚀 Getting Started
+
+### 1. Prerequisites
+
+- Node.js 18+
+- Supabase Project
+- Xendit Account (Sandbox)
+- Google AI Studio API Key
+
+### 2. Environment Variables
+
+Create a `.env.local` file based on `.env.example`:
+
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+# Xendit
+XENDIT_SECRET_KEY=xnd_...
+NEXT_PUBLIC_XENDIT_PUBLIC_KEY=xnd_public_...
+XENDIT_WEBHOOK_TOKEN=your_callback_token
+
+# Google Gemini AI
+GEMINI_API_KEY=your_gemini_key
+
+# App
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Database Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Run the migrations provided in `supabase/migrations/001_initial_schema.sql` in your Supabase SQL Editor.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. Installation & Development
 
-## Learn More
+```bash
+# Install dependencies
+npm install
 
-To learn more about Next.js, take a look at the following resources:
+# Run development server
+npm run dev
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Build for production
+npm run build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📈 Platform Workflow
 
-## Deploy on Vercel
+1. **Discovery**: User chats with AI to find courses, hotels, and travel options.
+2. **Booking**: AI help user select specific items; a booking is created in `pending_approval` status.
+3. **Approval**: Respective vendors log in to their dashboards to approve the request.
+4. **Payment**: Once all vendors approve, user pays via Xendit invoice.
+5. **Confirmation**: Webhook notifies the system, updating booking to `paid`.
+6. **Settlement**: Admin manually forwards the funds to vendors (tracked in Admin Dashboard).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📱 Mobile App (PWA)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+To install as an app:
+1. Open the URL on a mobile browser.
+2. Select "Add to Home Screen".
+3. Enjoy offline-first score tracking at the course!
+
+---
+
+Developed with ❤️ for Golf Enthusiasts.
