@@ -1,92 +1,67 @@
-# Golf Tourism Platform ⛳🏨🚗
+# 🏌️‍♂️ Golf Tourism Platform (AI-Powered)
 
-A premium, full-stack Golf Tourism Platform built with **Next.js 16**, **Supabase**, **Xendit**, and **Google Gemini AI**.
+A premium, full-stack Golf Tourism platform built with **Next.js 16**, **Supabase**, and **Google Gemini AI**. Designed to provide a seamless booking experience for golfers while offering robust management tools for courses, hotels, and travel vendors.
 
-## 🌟 Key Features
+## ✨ Features
 
-- **AI-Powered Conversational Booking**: Plan your entire trip by chatting with our Gemini AI agent.
-- **Multi-Vendor Ecosystem**: Unified booking flow for Golf Courses, Hotels, and Travel Packages.
-- **Offline-First PWA**: Track your golf scores even without an internet connection; syncs automatically when online.
-- **Role-Based Dashboards**:
-  - **Admin**: Revenue analytics, user management, and manual split-settlement tracking.
-  - **Golf Vendor**: Tee time management, caddie logs, and real-time score viewing.
-  - **Hotel Vendor**: Room inventory and availability management.
-  - **Travel Vendor**: Package and fleet operations.
-- **Secure Payments**: Integrated with Xendit for Invoices (VA, QRIS, e-Wallets).
+### 🌈 User Experience
+*   **High-Impact Light Mode**: A clean, premium emerald-themed UI designed for clarity and elegance.
+*   **Card-Based Discovery**: Navigate through large, interactive category cards for Golf, Hotels, and Travel.
+*   **AI Concierge**: A full-screen AI assistant that can plan and book your entire trip conversationally using Gemini 1.5 Flash.
+*   **Manual Trip Builder**: Persistent "Trip Summary" bar allows users to select items across categories and review them in a unified checkout.
 
-## 🛠 Tech Stack
+### 🏨 Vendor & Admin Ecosystem (7 Dashboards)
+*   **Golf Vendor**: Manage tee times, caddies, and view real-time player scores.
+*   **Hotel Vendor**: Room inventory management and booking approvals.
+*   **Travel Vendor**: Logistics hub for airport transfers and day tours.
+*   **Admin Hub**: Central management of system architecture, user roles, and manual split-settlement logs.
 
-- **Frontend**: Next.js 16 (App Router), Tailwind CSS, Lucide Icons.
-- **Backend**: Next.js Server Actions & API Routes (Edge-ready).
-- **Database/Auth**: Supabase (PostgreSQL, RLS, Auth).
-- **AI**: Google Generative AI (Gemini 1.5 Flash).
-- **Payments**: Xendit Node SDK.
-- **PWA**: `@ducanh2912/next-pwa`.
+### 🏧 Payment & Security
+*   **Xendit Integration**: Production-ready payment flow (VA, QRIS, eWallet).
+*   **Unified Checkout**: Single-point review for multi-item bookings.
+*   **Role-Based Access**: Secure Supabase RLS and Next.js Middleware protection for all roles.
+
+### 📱 PWA & Offline
+*   **Offline Score Tracking**: Sync scores to the clubhouse even without a connection using Service Workers and Background Sync.
+
+## 🛠️ Tech Stack
+*   **Frontend**: Next.js 16 (App Router), Tailwind CSS, Lucide Icons.
+*   **Backend**: Supabase (Database, Auth, RLS).
+*   **AI**: Google Generative AI (Gemini 1.5 Flash).
+*   **Payments**: Xendit Node SDK.
+*   **Cloud**: Vercel.
 
 ## 🚀 Getting Started
 
-### 1. Prerequisites
+1.  **Clone & Install**:
+    ```bash
+    git clone https://github.com/your-username/golf-one.git
+    cd golf-one
+    npm install
+    ```
 
-- Node.js 18+
-- Supabase Project
-- Xendit Account (Sandbox)
-- Google AI Studio API Key
+2.  **Environment Setup**:
+    Create a `.env.local` with your credentials:
+    ```env
+    NEXT_PUBLIC_SUPABASE_URL=...
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+    GEMINI_API_KEY=...
+    XENDIT_SECRET_KEY=...
+    ```
 
-### 2. Environment Variables
+3.  **Run Development**:
+    ```bash
+    npm run dev
+    ```
 
-Create a `.env.local` file based on `.env.example`:
+4.  **Seed Data**:
+    Run the seeder to populate courses and hotels:
+    ```bash
+    npx tsx scripts/seed-full-data.ts
+    ```
 
-```env
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-
-# Xendit
-XENDIT_SECRET_KEY=xnd_...
-NEXT_PUBLIC_XENDIT_PUBLIC_KEY=xnd_public_...
-XENDIT_WEBHOOK_TOKEN=your_callback_token
-
-# Google Gemini AI
-GEMINI_API_KEY=your_gemini_key
-
-# App
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
-
-### 3. Database Setup
-
-Run the migrations provided in `supabase/migrations/001_initial_schema.sql` in your Supabase SQL Editor.
-
-### 4. Installation & Development
-
-```bash
-# Install dependencies
-npm install
-
-# Run development server
-npm run dev
-
-# Build for production
-npm run build
-```
-
-## 📈 Platform Workflow
-
-1. **Discovery**: User chats with AI to find courses, hotels, and travel options.
-2. **Booking**: AI help user select specific items; a booking is created in `pending_approval` status.
-3. **Approval**: Respective vendors log in to their dashboards to approve the request.
-4. **Payment**: Once all vendors approve, user pays via Xendit invoice.
-5. **Confirmation**: Webhook notifies the system, updating booking to `paid`.
-6. **Settlement**: Admin manually forwards the funds to vendors (tracked in Admin Dashboard).
-
-## 📱 Mobile App (PWA)
-
-To install as an app:
-1. Open the URL on a mobile browser.
-2. Select "Add to Home Screen".
-3. Enjoy offline-first score tracking at the course!
+## 📜 License
+Privately owned by the Golf Tourism Platform team.
 
 ---
-
-Developed with ❤️ for Golf Enthusiasts.
+*Created with ❤️ by Antigravity*

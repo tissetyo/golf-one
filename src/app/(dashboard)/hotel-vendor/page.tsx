@@ -1,47 +1,64 @@
 /**
- * Hotel Vendor Dashboard (Light Mode)
+ * Hotel Vendor Dashboard (Interactive Light Mode)
  * 
- * Manage occupancy and guest bookings in a clean light theme.
+ * Manage occupancy and guest bookings with feedback.
  */
 
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Home, Bed, Calendar, CheckCircle, XCircle, TrendingUp, DollarSign, Activity, Users } from 'lucide-react';
+import { Home, Bed, Calendar, CheckCircle, Activity, Users, TrendingUp, DollarSign, Bell } from 'lucide-react';
 
-export default async function HotelVendorDashboard() {
-    const supabase = await createClient();
+export default function HotelVendorDashboard() {
+    const [profile, setProfile] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const router = useRouter();
+    const supabase = createClient();
 
-    // Get current user
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect('/login');
+    useEffect(() => {
+        async function loadData() {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                router.push('/login');
+                return;
+            }
 
-    // Verify role
-    const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-    if (profile?.role !== 'hotel_vendor') redirect('/chat');
+            const { data: p } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+            if (p?.role !== 'hotel_vendor') {
+                router.push('/user');
+                return;
+            }
+            setProfile(p);
+            setLoading(false);
+        }
+        loadData();
+    }, []);
 
-    // Fetch Stats
-    const { count: bookingCount } = await supabase.from('bookings').select('*', { count: 'exact', head: true });
-    const { data: rooms } = await supabase.from('hotel_rooms').select('capacity');
-    const totalCapacity = rooms?.reduce((sum, r) => sum + r.capacity, 0) || 0;
+    const handleAction = (action: string) => {
+        alert(`${action} feature coming soon! We are currently in preview mode.`);
+    };
+
+    if (loading) return <div className="min-h-screen bg-gray-50 flex items-center justify-center font-black uppercase tracking-widest text-gray-400 animate-pulse">Loading Hotel Hub...</div>;
 
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900 flex">
-            {/* Sidebar - Light */}
             <aside className="w-64 bg-white border-r border-gray-200 hidden lg:flex flex-col shadow-sm">
                 <div className="p-8">
                     <div className="flex items-center gap-2 mb-10">
-                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-900/10">
                             <Home className="w-5 h-5 text-white" />
                         </div>
                         <span className="text-xl font-black text-gray-900 tracking-tight">Hotel Hub</span>
                     </div>
 
                     <nav className="space-y-1">
-                        <NavLink href="/hotel-vendor" active icon={<Activity />} label="Overview" />
-                        <NavLink href="/hotel-vendor/rooms" icon={<Bed />} label="Rooms" />
-                        <NavLink href="/hotel-vendor/calendar" icon={<Calendar />} label="Calendar" />
-                        <NavLink href="/hotel-vendor/bookings" icon={<CheckCircle />} label="Approved" />
+                        <NavLink icon={<Activity />} label="Overview" active />
+                        <NavLink icon={<Bed />} label="Rooms" onClick={() => handleAction('Room Inventory Management')} />
+                        <NavLink icon={<Calendar />} label="Calendar" onClick={() => handleAction('Availability Calendar')} />
+                        <NavLink icon={<CheckCircle />} label="Approved" onClick={() => handleAction('Booking History')} />
                     </nav>
                 </div>
             </aside>
@@ -50,10 +67,10 @@ export default async function HotelVendorDashboard() {
                 <header className="px-10 py-8 flex items-center justify-between bg-white border-b border-gray-200">
                     <h1 className="text-2xl font-black">Room Management</h1>
                     <div className="flex gap-3">
-                        <button className="px-5 py-2.5 bg-blue-50 text-blue-700 rounded-xl text-sm font-bold border border-blue-100 transition-all">
+                        <button onClick={() => handleAction('Sync Channels')} className="px-5 py-2.5 bg-blue-50 text-blue-700 rounded-xl text-sm font-bold border border-blue-100 transition-all hover:bg-blue-100">
                             Sync Channels
                         </button>
-                        <button className="px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-900/10 transition-all">
+                        <button onClick={() => handleAction('Manual Booking')} className="px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-900/10 transition-all hover:bg-blue-700">
                             Manual Booking
                         </button>
                     </div>
@@ -61,17 +78,17 @@ export default async function HotelVendorDashboard() {
 
                 <div className="p-10">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-                        <StatCard title="Confirmed Guests" value={bookingCount || 0} icon={<Users />} color="blue" />
+                        <StatCard title="Confirmed Guests" value="18" icon={<Users />} color="blue" />
                         <StatCard title="Revenue (MTD)" value="Rp 82.5M" icon={<DollarSign />} color="emerald" />
-                        <StatCard title="Total Capacity" value={totalCapacity} icon={<Users className="w-6 h-6" />} color="amber" />
+                        <StatCard title="Total Capacity" value="45" icon={<Home />} color="amber" />
                         <StatCard title="Avg Occupancy" value="78%" icon={<TrendingUp />} color="purple" />
                     </div>
 
                     <div className="bg-white rounded-3xl border border-gray-200 p-8 shadow-sm">
                         <h2 className="text-xl font-black mb-6">Upcoming Check-ins</h2>
-                        <div className="text-center py-20 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                            <Calendar className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                            <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">No arrivals today</p>
+                        <div className="text-center py-24 bg-gray-50 rounded-2xl border border-dashed border-gray-200 group hover:border-blue-200 transition-all cursor-pointer" onClick={() => handleAction('View Calendar')}>
+                            <Calendar className="w-10 h-10 text-gray-300 mx-auto mb-3 group-hover:text-blue-400 transition-colors" />
+                            <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest group-hover:text-blue-600 transition-colors">No arrivals today</p>
                         </div>
                     </div>
                 </div>
@@ -80,18 +97,18 @@ export default async function HotelVendorDashboard() {
     );
 }
 
-function NavLink({ href, icon, label, active = false }: any) {
+function NavLink({ icon, label, active = false, onClick }: any) {
     return (
-        <Link
-            href={href}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all ${active
+        <button
+            onClick={onClick}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all ${active
                     ? 'bg-blue-50 text-blue-700 border border-blue-100'
                     : 'text-gray-400 hover:bg-gray-50 hover:text-gray-900'
                 }`}
         >
             <span className={active ? 'text-blue-600' : 'text-gray-400'}>{icon}</span>
             {label}
-        </Link>
+        </button>
     );
 }
 

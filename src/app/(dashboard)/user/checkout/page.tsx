@@ -7,6 +7,7 @@
 
 'use client';
 
+import { createClient } from '@/lib/supabase/client';
 import { useBooking } from '@/components/booking/BookingProvider';
 import { Flag, Hotel, Map, ChevronLeft, ChevronRight, CreditCard, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
@@ -14,6 +15,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function CheckoutPage() {
+    const supabase = createClient();
     const { trip, totalPrice, clearTrip } = useBooking();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
@@ -43,11 +45,34 @@ export default function CheckoutPage() {
 
     const handleConfirmBooking = async () => {
         setIsSubmitting(true);
-        // Simulate API call to create booking
-        await new Promise(r => setTimeout(r, 2000));
-        setIsSubmitting(false);
-        setIsSuccess(true);
-        clearTrip();
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error('Not authenticated');
+
+            const { error } = await supabase
+                .from('bookings')
+                .insert({
+                    user_id: user.id,
+                    booking_type: 'package',
+                    total_amount: totalPrice + 75000,
+                    status: 'pending_approval',
+                    booking_details: {
+                        golf: trip.golf,
+                        hotel: trip.hotel,
+                        travel: trip.travel
+                    }
+                });
+
+            if (error) throw error;
+            setIsSuccess(true);
+            clearTrip();
+        } catch (error) {
+            console.error('Booking error:', error);
+            alert('Failed to request booking. Please try again.');
+        } finally {
+            setIsSubmitting(true); // Keep spinner until redirect
+            setIsSubmitting(false);
+        }
     };
 
     const hasItems = trip.golf || trip.hotel || trip.travel;
