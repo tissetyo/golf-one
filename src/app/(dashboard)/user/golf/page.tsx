@@ -12,6 +12,8 @@ import Link from 'next/link';
 import GolfCoursesClient from '@/components/category/GolfCoursesClient';
 import TripSummary from '@/components/booking/TripSummary';
 
+export const dynamic = 'force-dynamic';
+
 export default async function GolfResultsPage() {
     const supabase = await createClient();
 

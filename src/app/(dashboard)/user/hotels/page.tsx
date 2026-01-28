@@ -12,6 +12,8 @@ import Link from 'next/link';
 import HotelsClient from '@/components/category/HotelsClient';
 import TripSummary from '@/components/booking/TripSummary';
 
+export const dynamic = 'force-dynamic';
+
 export default async function HotelsResultsPage() {
     const supabase = await createClient();
 
