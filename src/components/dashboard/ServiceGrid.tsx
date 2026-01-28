@@ -8,10 +8,10 @@ const services = [
     { name: 'Hotels', icon: <Hotel className="w-6 h-6" />, href: '/user/hotels', color: 'bg-blue-50 text-blue-600' },
     { name: 'Travel', icon: <Map className="w-6 h-6" />, href: '/user/travel', color: 'bg-orange-50 text-orange-600' },
     { name: 'AI Planner', icon: <MessageCircle className="w-6 h-6" />, href: '/user/ai-assistant', color: 'bg-purple-50 text-purple-600' },
-    { name: 'Tourney', icon: <Trophy className="w-6 h-6" />, href: '#', color: 'bg-amber-50 text-amber-600' },
+    { name: 'Tourney', icon: <Trophy className="w-6 h-6" />, href: '/scores', color: 'bg-emerald-50 text-emerald-600' },
     { name: 'Vouchers', icon: <Ticket className="w-6 h-6" />, href: '#', color: 'bg-rose-50 text-rose-600' },
-    { name: 'Explore', icon: <Sparkles className="w-6 h-6" />, href: '#', color: 'bg-indigo-50 text-indigo-600' },
-    { name: 'Support', icon: <HelpCircle className="w-6 h-6" />, href: '#', color: 'bg-gray-50 text-gray-500' },
+    { name: 'Explore', icon: <Sparkles className="w-6 h-6" />, href: '/user/golf', color: 'bg-indigo-50 text-indigo-600' },
+    { name: 'Support', icon: <HelpCircle className="w-6 h-6" />, href: '/user/ai-assistant', color: 'bg-gray-50 text-gray-500' },
 ];
 
 export default function ServiceGrid() {
