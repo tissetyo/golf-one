@@ -7,13 +7,22 @@
 
 import Xendit from 'xendit-node';
 
-// Initialize Xendit client
-const xenditClient = new Xendit({
-    secretKey: process.env.XENDIT_SECRET_KEY || '',
-});
+// Lazy-initialized Xendit client
+let xenditClient: Xendit | null = null;
 
-// Get Invoice module
-const { Invoice } = xenditClient;
+function getXenditClient() {
+    if (!xenditClient) {
+        xenditClient = new Xendit({
+            secretKey: process.env.XENDIT_SECRET_KEY || '',
+        });
+    }
+    return xenditClient;
+}
+
+// Helper to get Invoice module with lazy initialization
+function getInvoiceModule() {
+    return getXenditClient().Invoice;
+}
 
 /**
  * Invoice creation parameters
@@ -63,7 +72,7 @@ export interface XenditInvoice {
  */
 export async function createInvoice(params: CreateInvoiceParams): Promise<XenditInvoice> {
     try {
-        const invoice = await Invoice.createInvoice({
+        const invoice = await getInvoiceModule().createInvoice({
             data: {
                 externalId: params.externalId,
                 amount: params.amount,
@@ -95,7 +104,7 @@ export async function createInvoice(params: CreateInvoiceParams): Promise<Xendit
  */
 export async function getInvoice(invoiceId: string): Promise<XenditInvoice> {
     try {
-        const invoice = await Invoice.getInvoiceById({ invoiceId });
+        const invoice = await getInvoiceModule().getInvoiceById({ invoiceId });
         return invoice as unknown as XenditInvoice;
     } catch (error) {
         console.error('Xendit getInvoice error:', error);
@@ -108,7 +117,7 @@ export async function getInvoice(invoiceId: string): Promise<XenditInvoice> {
  */
 export async function expireInvoice(invoiceId: string): Promise<XenditInvoice> {
     try {
-        const invoice = await Invoice.expireInvoice({ invoiceId });
+        const invoice = await getInvoiceModule().expireInvoice({ invoiceId });
         return invoice as unknown as XenditInvoice;
     } catch (error) {
         console.error('Xendit expireInvoice error:', error);

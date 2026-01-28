@@ -13,6 +13,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { LayoutDashboard, Users, CreditCard, ShieldCheck, ArrowRight, AlertCircle, BarChart3, Settings, Bell, Search, Filter } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default function AdminDashboard() {
     const [profile, setProfile] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -163,8 +165,8 @@ function NavLink({ icon, label, active = false, onClick }: any) {
         <button
             onClick={onClick}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all ${active
-                    ? 'bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-sm'
-                    : 'text-gray-400 hover:bg-gray-50 hover:text-gray-900'
+                ? 'bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-sm'
+                : 'text-gray-400 hover:bg-gray-50 hover:text-gray-900'
                 }`}
         >
             <span className={active ? 'text-indigo-600' : 'text-gray-400'}>{icon}</span>

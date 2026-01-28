@@ -10,16 +10,21 @@ import { cookies } from 'next/headers';
 
 /**
  * Creates a Supabase client for server components and API routes.
- * This client properly handles authentication via cookies.
- * 
- * @returns Supabase client instance
  */
 export async function createClient() {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+        console.warn('Supabase environment variables are missing. Prerendering might fail.');
+        return {} as any;
+    }
+
     const cookieStore = await cookies();
 
     return createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        supabaseUrl,
+        supabaseAnonKey,
         {
             cookies: {
                 getAll() {
@@ -31,8 +36,7 @@ export async function createClient() {
                             cookieStore.set(name, value, options)
                         );
                     } catch {
-                        // The `setAll` method was called from a Server Component.
-                        // This can be ignored if you have middleware refreshing user sessions.
+                        // Ignore in Server Components
                     }
                 },
             },
@@ -42,18 +46,21 @@ export async function createClient() {
 
 /**
  * Creates a Supabase admin client with service role key.
- * Use this for operations that need to bypass RLS.
- * 
- * WARNING: Only use this in secure server-side contexts.
- * 
- * @returns Supabase admin client instance
  */
 export async function createAdminClient() {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !serviceRoleKey) {
+        console.warn('Supabase Admin environment variables are missing.');
+        return {} as any;
+    }
+
     const cookieStore = await cookies();
 
     return createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        supabaseUrl,
+        serviceRoleKey,
         {
             cookies: {
                 getAll() {

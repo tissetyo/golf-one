@@ -11,6 +11,8 @@ import CategoryCards from '@/components/dashboard/CategoryCards';
 import { Trophy, Calendar, MapPin, ChevronRight, Star, Clock } from 'lucide-react';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 export default async function UserDashboardPage() {
     const supabase = await createClient();
 

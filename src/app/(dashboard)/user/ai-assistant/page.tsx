@@ -11,6 +11,8 @@ import CategoryNav from '@/components/dashboard/CategoryNav';
 import ChatInterface from '@/components/chat/ChatInterface';
 import { Sparkles, Info } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AIAssistantPage() {
     const supabase = await createClient();
 
