@@ -211,7 +211,7 @@ export default async function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {featuredCourses.map((course) => (
+              {featuredCourses.map((course: any) => (
                 <div
                   key={course.id}
                   className="bg-gray-800/50 rounded-2xl overflow-hidden border border-gray-700/50 hover:border-emerald-500/50 transition-colors"
