@@ -77,7 +77,7 @@ export default async function UserDashboardPage() {
 
                             {bookings && bookings.length > 0 ? (
                                 <div className="grid gap-4">
-                                    {bookings.map((booking) => (
+                                    {bookings.map((booking: any) => (
                                         <BookingCard key={booking.id} booking={booking} />
                                     ))}
                                 </div>
