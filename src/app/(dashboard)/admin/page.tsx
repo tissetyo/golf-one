@@ -31,8 +31,16 @@ export default function AdminDashboard() {
 
             const { data: p, error: pError } = await supabase.from('profiles').select('*').eq('id', user.id).single();
 
-            if (pError || p?.role !== 'admin') {
-                console.log('User is not admin, redirecting to dashboard...', p?.role);
+            if (pError) {
+                console.error('Error fetching admin profile:', pError.message);
+                // Don't bounce immediately on transient error, but if we have profile and it's not admin, then bounce
+                if (pError.code === 'PGRST116') { // Not found
+                    router.push('/user');
+                    return;
+                }
+            }
+
+            if (p && p.role !== 'admin') {
                 router.push('/user');
                 return;
             }

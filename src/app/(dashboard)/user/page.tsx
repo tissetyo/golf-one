@@ -28,11 +28,12 @@ export default async function UserDashboardPage() {
         .eq('id', user.id)
         .single();
 
-    // Role-based redirection: Ensure users land on their respective dashboards
-    if (profile?.role === 'admin') redirect('/admin');
-    if (profile?.role === 'golf_vendor') redirect('/golf-vendor');
-    if (profile?.role === 'hotel_vendor') redirect('/hotel-vendor');
-    if (profile?.role === 'travel_vendor') redirect('/travel-vendor');
+    // Role-based redirection: Ensure specialized roles land on their hubs
+    if (profile?.role && profile.role !== 'user') {
+        console.log(`User has role ${profile.role}, redirecting to specialized dashboard...`);
+        if (profile.role === 'admin') redirect('/admin');
+        if (profile.role.includes('_vendor')) redirect(`/${profile.role.replace('_', '-')}`);
+    }
 
     // Load active bookings
     const { data: bookings } = await supabase

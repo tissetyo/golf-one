@@ -10,7 +10,7 @@ import type { NextRequest } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
 
 // Route configurations
-const publicRoutes = ['/', '/login', '/register', '/auth/callback'];
+const publicRoutes = ['/', '/login', '/register', '/auth/callback', '/api/debug-role'];
 const roleRoutes: Record<string, string[]> = {
     admin: ['/admin'],
     golf_vendor: ['/golf-vendor'],
@@ -23,14 +23,14 @@ const roleRoutes: Record<string, string[]> = {
  * Middleware function that runs on every request.
  * Handles session refresh and role-based access control.
  */
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Refresh session and get user
     const { supabaseResponse, user, supabase } = await updateSession(request);
 
     // Allow public routes
-    if (publicRoutes.some((route) => pathname === route || pathname.startsWith('/api/auth'))) {
+    if (publicRoutes.some((route) => pathname === route || pathname.startsWith('/api/auth') || pathname.startsWith('/api/debug-role'))) {
         return supabaseResponse;
     }
 
@@ -41,37 +41,50 @@ export async function proxy(request: NextRequest) {
 
     // Redirect unauthenticated users to login
     if (!user) {
-        const loginUrl = new URL('/login', request.url);
-        loginUrl.searchParams.set('redirect', pathname);
-        return NextResponse.redirect(loginUrl);
+        // Only redirect if it's a dashboard route
+        if (pathname.startsWith('/admin') || pathname.startsWith('/user') || pathname.startsWith('/golf-vendor') || pathname.startsWith('/hotel-vendor') || pathname.startsWith('/travel-vendor') || pathname.startsWith('/chat')) {
+            const loginUrl = new URL('/login', request.url);
+            loginUrl.searchParams.set('redirect', pathname);
+            return NextResponse.redirect(loginUrl);
+        }
+        return supabaseResponse;
     }
 
-    // Get user role from profile
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
+    try {
+        // Get user role from profile with timeout or error handling
+        const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
 
-    const userRole = profile?.role || 'user';
+        if (error) {
+            // If profile is missing or error, default to user role to avoid blocking request
+            console.error('Middleware profile fetch error:', error.message);
+        }
 
-    // Check role-based access
-    for (const [role, routes] of Object.entries(roleRoutes)) {
-        const isRoleRoute = routes.some((route) => pathname.startsWith(route));
+        const userRole = profile?.role || 'user';
 
-        if (isRoleRoute) {
-            // Admin has access to everything
-            if (userRole === 'admin') {
-                return supabaseResponse;
-            }
+        // Check role-based access
+        for (const [role, routes] of Object.entries(roleRoutes)) {
+            const isRoleRoute = routes.some((route) => pathname.startsWith(route));
 
-            // Check if user has the required role
-            if (role !== userRole) {
-                // Redirect to appropriate dashboard
-                const redirectPath = getDashboardPath(userRole);
-                return NextResponse.redirect(new URL(redirectPath, request.url));
+            if (isRoleRoute) {
+                // Admin has access to everything
+                if (userRole === 'admin') {
+                    return supabaseResponse;
+                }
+
+                // Check if user has the required role
+                if (role !== userRole) {
+                    // Redirect to appropriate dashboard
+                    const redirectPath = getDashboardPath(userRole);
+                    return NextResponse.redirect(new URL(redirectPath, request.url));
+                }
             }
         }
+    } catch (e) {
+        console.error('Middleware logic error:', e);
     }
 
     return supabaseResponse;
@@ -91,7 +104,7 @@ function getDashboardPath(role: string): string {
         case 'travel_vendor':
             return '/travel-vendor';
         default:
-            return '/chat';
+            return '/user';
     }
 }
 
