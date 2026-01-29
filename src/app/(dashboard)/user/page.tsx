@@ -9,7 +9,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import ServiceGrid from '@/components/dashboard/ServiceGrid';
 import QuickStats from '@/components/dashboard/QuickStats';
-import { Trophy, Calendar, MapPin, ChevronRight, Star, Search, Wallet, Bell, Sparkles } from 'lucide-react';
+import { Trophy, Calendar, MapPin, ChevronRight, Star, Search, Wallet, Bell, Sparkles, LogOut } from 'lucide-react';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
@@ -56,9 +56,11 @@ export default async function UserDashboardPage() {
                             <Bell className="w-5 h-5" />
                         </button>
                         <button className="p-2.5 bg-emerald-500/50 rounded-full hover:bg-emerald-500/80 transition-all border border-white/10">
-                            <Bell className="w-5 h-5 opacity-0 absolute" /> {/* Placeholder for alignment */}
                             <Sparkles className="w-5 h-5" />
                         </button>
+                        <Link href="/auth/logout" className="p-2.5 bg-red-500/50 rounded-full hover:bg-red-500/80 transition-all border border-white/10 text-white" title="Logout">
+                            <LogOut className="w-5 h-5" />
+                        </Link>
                     </div>
                 </div>
 

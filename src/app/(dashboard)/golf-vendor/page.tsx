@@ -68,7 +68,12 @@ export default function GolfVendorDashboard() {
 
                 <div className="mt-auto p-8 border-t border-gray-100 bg-gray-50/50">
                     <p className="text-[10px] uppercase font-black text-gray-400 tracking-widest mb-1">Managed By</p>
-                    <p className="text-sm font-bold text-gray-700 truncate">{profile.full_name}</p>
+                    <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm font-bold text-gray-700 truncate">{profile.full_name}</p>
+                        <Link href="/auth/logout" className="p-2 bg-gray-100 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all" title="Logout">
+                            <LogOut className="w-4 h-4" />
+                        </Link>
+                    </div>
                 </div>
             </aside>
 
