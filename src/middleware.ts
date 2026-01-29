@@ -10,6 +10,9 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
 
+// Define public routes that do not require authentication
+const publicRoutes = ['/', '/login', '/admin/login', '/register', '/auth/callback', '/api/debug-role'];
+
 export async function middleware(request: NextRequest) {
     // We only call updateSession to ensure cookies are refreshed.
     // We NO LONGER perform redirects here to avoid conflicts with App Router page logic.
