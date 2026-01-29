@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { User, Shield, Mail, MoreVertical } from 'lucide-react';
+import { updateUserRole } from '@/app/(dashboard)/admin/actions';
 
 export default function UsersManager() {
     const [users, setUsers] = useState<any[]>([]);
@@ -25,15 +26,16 @@ export default function UsersManager() {
         setLoading(false);
     };
 
-    const updateUserRole = async (userId: string, newRole: string) => {
+    const handleUpdateUserRole = async (userId: string, newRole: string) => {
         if (!confirm(`Change user role to ${newRole}?`)) return;
 
-        const { error } = await supabase
-            .from('profiles')
-            .update({ role: newRole })
-            .eq('id', userId);
+        const result = await updateUserRole(userId, newRole);
 
-        if (!error) loadUsers();
+        if (result.error) {
+            alert('Failed to update role: ' + result.error);
+        } else {
+            loadUsers();
+        }
     };
 
     if (loading) return <div className="p-10 text-center text-gray-400">Loading Users...</div>;
@@ -74,8 +76,8 @@ export default function UsersManager() {
                                 </td>
                                 <td className="px-8 py-4">
                                     <span className={`px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wide border ${user.role === 'admin' ? 'bg-indigo-50 text-indigo-600 border-indigo-100' :
-                                            user.role.includes('vendor') ? 'bg-purple-50 text-purple-600 border-purple-100' :
-                                                'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                        user.role.includes('vendor') ? 'bg-purple-50 text-purple-600 border-purple-100' :
+                                            'bg-emerald-50 text-emerald-600 border-emerald-100'
                                         }`}>
                                         {user.role.replace('_', ' ')}
                                     </span>
@@ -86,7 +88,7 @@ export default function UsersManager() {
                                 <td className="px-8 py-4 text-right">
                                     <select
                                         value={user.role}
-                                        onChange={(e) => updateUserRole(user.id, e.target.value)}
+                                        onChange={(e) => handleUpdateUserRole(user.id, e.target.value)}
                                         className="text-xs border border-gray-200 rounded-lg p-2 bg-white"
                                     >
                                         <option value="user">User</option>
