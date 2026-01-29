@@ -2,6 +2,7 @@
 
 import { Calendar, MapPin, Filter, ChevronDown, Check } from 'lucide-react';
 import { useState } from 'react';
+import CalendarModal from './CalendarModal';
 
 interface FilterOption {
     id: string;
@@ -31,7 +32,9 @@ const sorts = [
 export default function QuickFilters({ onFilterChange, category }: QuickFiltersProps) {
     const [selectedLocation, setSelectedLocation] = useState(locations[0]);
     const [selectedSort, setSelectedSort] = useState(sorts[0]);
+    const [selectedRange, setSelectedRange] = useState<{ start: string, end: string } | null>(null);
     const [activeTab, setActiveTab] = useState<'location' | 'date' | 'sort' | null>(null);
+    const [showCalendar, setShowCalendar] = useState(false);
 
     return (
         <div className="bg-white border-b border-gray-100 -mx-6 px-6 py-4 sticky top-[72px] lg:top-[88px] z-30">
@@ -46,12 +49,15 @@ export default function QuickFilters({ onFilterChange, category }: QuickFiltersP
                     <ChevronDown className={`w-3 h-3 transition-transform ${activeTab === 'location' ? 'rotate-180' : ''}`} />
                 </button>
 
-                {/* Date Selector (Simulation) */}
+                {/* Date Selector */}
                 <button
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-100 bg-gray-50 text-gray-500 whitespace-nowrap"
+                    onClick={() => setShowCalendar(true)}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border whitespace-nowrap transition-all ${selectedRange ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-gray-100 bg-gray-50 text-gray-500'}`}
                 >
                     <Calendar className="w-3.5 h-3.5" />
-                    <span className="text-[11px] font-black uppercase tracking-tight">Today, 29 Jan</span>
+                    <span className="text-[11px] font-black uppercase tracking-tight">
+                        {selectedRange ? `${selectedRange.start.split('-')[2]} - ${selectedRange.end.split('-')[2]} Jan` : 'Select Date'}
+                    </span>
                     <ChevronDown className="w-3 h-3" />
                 </button>
 
@@ -99,6 +105,16 @@ export default function QuickFilters({ onFilterChange, category }: QuickFiltersP
                         ))}
                     </div>
                 </div>
+            )}
+            {/* Calendar Modal */}
+            {showCalendar && (
+                <CalendarModal
+                    onClose={() => setShowCalendar(false)}
+                    onSelect={(range) => {
+                        setSelectedRange(range);
+                        onFilterChange?.({ ...range, location: selectedLocation.id, sort: selectedSort.id });
+                    }}
+                />
             )}
         </div>
     );
