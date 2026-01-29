@@ -1,16 +1,28 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 
 export async function saveCampaignTheme(theme: any) {
     const supabase = await createClient();
+    const adminClient = await createAdminClient();
 
     // Verify Admin
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: 'Unauthorized' };
 
-    const { error } = await supabase
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+    if (profile?.role !== 'admin') {
+        return { error: 'Unauthorized: Admin only' };
+    }
+
+    // Use Service Role to bypass RLS
+    const { error } = await adminClient
         .from('system_settings')
         .upsert({
             key: 'user_dashboard_theme',
@@ -28,12 +40,23 @@ export async function saveCampaignTheme(theme: any) {
 
 export async function addPromotionalBanner(title: string, imageUrl: string) {
     const supabase = await createClient();
+    const adminClient = await createAdminClient();
 
     // Verify Admin
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: 'Unauthorized' };
 
-    const { error } = await supabase.from('promotional_banners').insert({
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+    if (profile?.role !== 'admin') {
+        return { error: 'Unauthorized: Admin only' };
+    }
+
+    const { error } = await adminClient.from('promotional_banners').insert({
         title,
         image_url: imageUrl,
         sort_order: 99, // default to end
@@ -48,12 +71,23 @@ export async function addPromotionalBanner(title: string, imageUrl: string) {
 
 export async function deletePromotionalBanner(id: string) {
     const supabase = await createClient();
+    const adminClient = await createAdminClient();
 
     // Verify Admin
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: 'Unauthorized' };
 
-    const { error } = await supabase.from('promotional_banners').delete().eq('id', id);
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+    if (profile?.role !== 'admin') {
+        return { error: 'Unauthorized: Admin only' };
+    }
+
+    const { error } = await adminClient.from('promotional_banners').delete().eq('id', id);
 
     if (error) return { error: error.message };
 
@@ -63,6 +97,7 @@ export async function deletePromotionalBanner(id: string) {
 
 export async function updateUserRole(userId: string, newRole: string) {
     const supabase = await createClient();
+    const adminClient = await createAdminClient();
 
     // Verify Admin
     const { data: { user } } = await supabase.auth.getUser();
@@ -79,7 +114,7 @@ export async function updateUserRole(userId: string, newRole: string) {
         return { error: 'Unauthorized: Admin only' };
     }
 
-    const { error } = await supabase
+    const { error } = await adminClient
         .from('profiles')
         .update({ role: newRole })
         .eq('id', userId);
