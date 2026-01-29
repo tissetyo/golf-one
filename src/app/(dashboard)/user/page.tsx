@@ -28,12 +28,9 @@ export default async function UserDashboardPage() {
         .eq('id', user.id)
         .single();
 
-    // Role-based redirection: Ensure specialized roles land on their hubs
-    if (profile?.role && profile.role !== 'user') {
-        console.log(`User has role ${profile.role}, redirecting to specialized dashboard...`);
-        if (profile.role === 'admin') redirect('/admin');
-        if (profile.role.includes('_vendor')) redirect(`/${profile.role.replace('_', '-')}`);
-    }
+    // REMOVED aggressive redirect loop logic.
+    // If an Admin lands here, we just show them the user view or provide a link back.
+    // This stops the infinite middleware-to-page bounce.
 
     // Load active bookings
     const { data: bookings } = await supabase
@@ -58,6 +55,14 @@ export default async function UserDashboardPage() {
                             <p className="text-sm font-black leading-none">{profile?.full_name?.split(' ')[0] || 'Member'}</p>
                         </div>
                     </div>
+
+                    {/* Role indicator link for Admins/Vendors who land here */}
+                    {profile?.role && profile.role !== 'user' && (
+                        <Link href={profile.role === 'admin' ? '/admin' : `/${profile.role.replace('_', '-')}`} className="mx-4 px-3 py-1 bg-white/20 rounded-full text-[10px] font-black uppercase hover:bg-white/30 transition-all">
+                            Switch to {profile.role.replace('_', ' ')} Hub
+                        </Link>
+                    )}
+
                     <div className="flex items-center gap-2">
                         <button className="p-2.5 bg-emerald-500/50 rounded-full hover:bg-emerald-500/80 transition-all border border-white/10">
                             <Bell className="w-5 h-5" />
@@ -91,21 +96,6 @@ export default async function UserDashboardPage() {
                     <ServiceGrid />
                 </section>
 
-                {/* Promo Banner Section */}
-                <section>
-                    <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-[32px] p-8 text-white relative overflow-hidden shadow-xl shadow-indigo-900/10 group">
-                        <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl transition-transform group-hover:scale-125 duration-700"></div>
-                        <div className="relative z-10">
-                            <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-lg text-[10px] font-black uppercase tracking-widest leading-none mb-4 inline-block border border-white/10">Limited Offer</span>
-                            <h2 className="text-2xl font-black mb-2 leading-tight">Weekend Luxury <br /> Bali Getaway - 40% OFF</h2>
-                            <p className="text-indigo-100 text-sm mb-6 font-medium max-w-[200px]">Book before Monday to save up to Rp 5M on your next trip.</p>
-                            <Link href="/user/hotels" className="inline-flex items-center gap-2 px-6 py-3 bg-white text-indigo-900 rounded-xl font-black text-xs uppercase tracking-tight hover:shadow-lg transition-all active:scale-95">
-                                Book Now <ChevronRight className="w-4 h-4" />
-                            </Link>
-                        </div>
-                    </div>
-                </section>
-
                 {/* My Trips Area */}
                 <section>
                     <div className="flex items-center justify-between mb-6">
@@ -133,28 +123,6 @@ export default async function UserDashboardPage() {
                         </div>
                     )}
                 </section>
-
-                {/* Best Rounds Area */}
-                <div className="bg-emerald-50/50 rounded-[40px] p-8 border border-emerald-100/50">
-                    <h3 className="text-lg font-black mb-6 flex items-center gap-3 text-emerald-900">
-                        <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-emerald-100">
-                            <Trophy className="w-5 h-5 text-amber-500" />
-                        </div>
-                        Your Best Performance
-                    </h3>
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between p-5 bg-white rounded-3xl border border-emerald-100/50 shadow-sm">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-emerald-500 text-white rounded-2xl flex items-center justify-center font-black text-sm italic">#1</div>
-                                <div>
-                                    <p className="text-sm font-black text-gray-900">Bali National Golf</p>
-                                    <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">85 Strokes • Nusa Dua</p>
-                                </div>
-                            </div>
-                            <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full uppercase tracking-widest">Master</span>
-                        </div>
-                    </div>
-                </div>
             </main>
         </div>
     );

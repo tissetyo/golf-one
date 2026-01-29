@@ -23,27 +23,21 @@ export default function AdminDashboard() {
 
     useEffect(() => {
         async function loadData() {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+            if (userError || !user) {
                 router.push('/login');
                 return;
             }
 
-            const { data: p, error: pError } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+            const { data: p } = await supabase.from('profiles').select('*').eq('id', user.id).single();
 
-            if (pError) {
-                console.error('Error fetching admin profile:', pError.message);
-                // Don't bounce immediately on transient error, but if we have profile and it's not admin, then bounce
-                if (pError.code === 'PGRST116') { // Not found
-                    router.push('/user');
-                    return;
-                }
-            }
-
+            // SECURITY: If they are NOT an admin, redirect them out
             if (p && p.role !== 'admin') {
                 router.push('/user');
                 return;
             }
+
             setProfile(p);
             setLoading(false);
         }
@@ -51,10 +45,15 @@ export default function AdminDashboard() {
     }, []);
 
     const handleAction = (action: string) => {
-        alert(`${action} feature coming soon! Currently in administrative preview.`);
+        alert(`${action} feature coming soon!`);
     };
 
-    if (loading) return <div className="min-h-screen bg-gray-50 flex items-center justify-center font-black uppercase tracking-widest text-gray-400 animate-pulse">Entering System Core...</div>;
+    if (loading) return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center font-black uppercase tracking-widest text-gray-400">
+            <ShieldCheck className="w-8 h-8 animate-pulse text-indigo-400 mr-4" />
+            Entering System Core...
+        </div>
+    );
 
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900 flex">
@@ -69,17 +68,17 @@ export default function AdminDashboard() {
                     </div>
 
                     <nav className="space-y-1">
-                        <NavLink icon={<LayoutDashboard />} label="Overview" active />
-                        <NavLink icon={<Users />} label="Users" onClick={() => handleAction('User Management')} />
-                        <NavLink icon={<CreditCard />} label="Settlements" onClick={() => handleAction('Finance Management')} />
-                        <NavLink icon={<Settings />} label="Settings" onClick={() => handleAction('System Settings')} />
+                        <NavLink icon={<LayoutDashboard size={18} />} label="Overview" active />
+                        <NavLink icon={<Users size={18} />} label="Users" onClick={() => handleAction('User Management')} />
+                        <NavLink icon={<CreditCard size={18} />} label="Finance" onClick={() => handleAction('Finance Management')} />
+                        <NavLink icon={<Settings size={18} />} label="Settings" onClick={() => handleAction('System Settings')} />
                     </nav>
                 </div>
 
                 <div className="mt-auto p-8 border-t border-gray-100 bg-gray-50/50">
                     <p className="text-[10px] uppercase font-black text-gray-400 tracking-widest mb-1">Authenticated as</p>
-                    <div className="flex items-center justify-between gap-2">
-                        <p className="text-sm font-bold text-gray-700 truncate">{profile?.full_name}</p>
+                    <div className="flex items-center justify-between gap-2 overflow-hidden">
+                        <p className="text-sm font-bold text-gray-700 truncate">{profile?.full_name || 'Admin'}</p>
                         <Link href="/auth/logout" className="p-2 bg-gray-100 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all" title="Logout">
                             <LogOut className="w-4 h-4" />
                         </Link>
@@ -163,10 +162,6 @@ export default function AdminDashboard() {
                                 <FeedItem time="11:30 AM" user="Iwan" action="Hotel Verified" code="H-204" />
                                 <FeedItem time="10:15 AM" user="Platform" action="System Sync Complete" />
                             </div>
-                            <button onClick={() => handleAction('Download Audit Log')} className="w-full mt-10 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-400 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-100 transition-all flex items-center justify-center gap-2">
-                                Download Audit Trail
-                                <ArrowRight className="w-4 h-4" />
-                            </button>
                         </div>
                     </div>
                 </div>
