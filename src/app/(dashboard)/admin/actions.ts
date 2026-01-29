@@ -49,8 +49,13 @@ export async function saveCampaignTheme(theme: any) {
     const adminClient = await createAdminClient();
 
     // Verify Admin
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { error: 'Unauthorized' };
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    console.log('[saveCampaignTheme] User Check:', user?.id, 'Error:', authError);
+
+    if (!user) {
+        console.error('[saveCampaignTheme] Unauthorized - No User. Cookie issue?');
+        return { error: 'Unauthorized: No active session' };
+    }
 
     const { data: profile } = await supabase
         .from('profiles')
@@ -58,7 +63,10 @@ export async function saveCampaignTheme(theme: any) {
         .eq('id', user.id)
         .single();
 
+    console.log('[saveCampaignTheme] Profile Check:', profile);
+
     if (profile?.role !== 'admin') {
+        console.error('[saveCampaignTheme] Unauthorized - Role mismatch:', profile?.role);
         return { error: 'Unauthorized: Admin only' };
     }
 
