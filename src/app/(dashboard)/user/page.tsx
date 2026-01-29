@@ -28,9 +28,20 @@ export default async function UserDashboardPage() {
         .eq('id', user.id)
         .single();
 
-    // REMOVED aggressive redirect loop logic.
-    // If an Admin lands here, we just show them the user view or provide a link back.
-    // This stops the infinite middleware-to-page bounce.
+    // Load Campaign Data (Settings & Banners)
+    const { data: themeData } = await supabase
+        .from('system_settings')
+        .select('value')
+        .eq('key', 'user_dashboard_theme')
+        .single();
+
+    const theme = themeData?.value || { background_url: '', use_image: false };
+
+    const { data: banners } = await supabase
+        .from('promotional_banners')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true });
 
     // Load active bookings
     const { data: bookings } = await supabase
@@ -43,8 +54,14 @@ export default async function UserDashboardPage() {
 
     return (
         <div className="min-h-screen bg-white text-gray-900 pb-20">
-            {/* Grab-style Sticky Header */}
-            <header className="px-6 py-6 bg-emerald-600 text-white sticky top-0 z-30 shadow-lg">
+            {/* Grab-style Sticky Header with Dynamic Theme */}
+            <header
+                className={`px-6 py-6 text-white sticky top-0 z-30 shadow-lg transition-all bg-cover bg-center`}
+                style={{
+                    backgroundColor: theme.use_image ? 'transparent' : '#059669', // Emerald-600 default
+                    backgroundImage: theme.use_image && theme.background_url ? `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('${theme.background_url}')` : 'none'
+                }}
+            >
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full border-2 border-white/20 overflow-hidden bg-emerald-700 flex items-center justify-center font-black">
@@ -91,7 +108,21 @@ export default async function UserDashboardPage() {
             {/* Quick Status Bar */}
             <QuickStats initialBalance={12500000} initialPoints={2450} />
 
-            <main className="max-w-7xl mx-auto px-6 mt-12 space-y-12">
+            <main className="max-w-7xl mx-auto px-6 mt-6 space-y-8">
+                {/* Promotional Banners Carousel */}
+                {banners && banners.length > 0 && (
+                    <section className="overflow-x-auto pb-4 -mx-6 px-6 scrollbar-hide flex gap-4 snap-x">
+                        {banners.map((banner: any) => (
+                            <div key={banner.id} className="min-w-[85%] sm:min-w-[400px] aspect-[21/9] rounded-2xl overflow-hidden relative shadow-md snap-center shrink-0">
+                                <img src={banner.image_url} alt={banner.title} className="w-full h-full object-cover" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+                                    <h3 className="text-white font-bold text-lg">{banner.title}</h3>
+                                </div>
+                            </div>
+                        ))}
+                    </section>
+                )}
+
                 {/* Service Grid */}
                 <section>
                     <ServiceGrid />

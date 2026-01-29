@@ -11,13 +11,16 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, Users, CreditCard, ShieldCheck, ArrowRight, AlertCircle, BarChart3, Settings, Bell, Search, Filter, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, CreditCard, ShieldCheck, ArrowRight, AlertCircle, BarChart3, Settings, Bell, Search, Filter, LogOut, Megaphone } from 'lucide-react';
+import CampaignsManager from '@/components/admin/CampaignsManager';
+import UsersManager from '@/components/admin/UsersManager';
 
 export const dynamic = 'force-dynamic';
 
 export default function AdminDashboard() {
     const [profile, setProfile] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [activeView, setActiveView] = useState('overview');
     const router = useRouter();
     const supabase = createClient();
 
@@ -58,20 +61,44 @@ export default function AdminDashboard() {
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900 flex">
             {/* Sidebar */}
-            <aside className="w-64 bg-white border-r border-gray-200 hidden lg:flex flex-col shadow-sm">
+            <aside className="w-64 bg-white border-r border-gray-200 hidden lg:flex flex-col shadow-sm fixed h-full z-10">
                 <div className="p-8">
                     <div className="flex items-center gap-2 mb-10">
-                        <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-600/20">
-                            <ShieldCheck className="w-5 h-5 text-white" />
+                        <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/20 text-white">
+                            <ShieldCheck className="w-6 h-6" />
                         </div>
                         <span className="text-xl font-black tracking-tight text-gray-900">Admin Hub</span>
                     </div>
 
                     <nav className="space-y-1">
-                        <NavLink icon={<LayoutDashboard size={18} />} label="Overview" active />
-                        <NavLink icon={<Users size={18} />} label="Users" onClick={() => handleAction('User Management')} />
-                        <NavLink icon={<CreditCard size={18} />} label="Finance" onClick={() => handleAction('Finance Management')} />
-                        <NavLink icon={<Settings size={18} />} label="Settings" onClick={() => handleAction('System Settings')} />
+                        <NavLink
+                            icon={<LayoutDashboard size={18} />}
+                            label="Overview"
+                            active={activeView === 'overview'}
+                            onClick={() => setActiveView('overview')}
+                        />
+                        <NavLink
+                            icon={<Users size={18} />}
+                            label="User Management"
+                            active={activeView === 'users'}
+                            onClick={() => setActiveView('users')}
+                        />
+                        <NavLink
+                            icon={<Megaphone size={18} />}
+                            label="Campaigns & UI"
+                            active={activeView === 'campaigns'}
+                            onClick={() => setActiveView('campaigns')}
+                        />
+                        <NavLink
+                            icon={<CreditCard size={18} />}
+                            label="Finance"
+                            onClick={() => handleAction('Finance Management')}
+                        />
+                        <NavLink
+                            icon={<Settings size={18} />}
+                            label="Settings"
+                            onClick={() => handleAction('System Settings')}
+                        />
                     </nav>
                 </div>
 
@@ -87,9 +114,13 @@ export default function AdminDashboard() {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 overflow-y-auto">
+            <main className="flex-1 lg:ml-64 overflow-y-auto min-h-screen">
                 <header className="px-10 py-8 flex items-center justify-between bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
-                    <h1 className="text-2xl font-black">System Architecture</h1>
+                    <h1 className="text-2xl font-black">{
+                        activeView === 'overview' ? 'System Architecture' :
+                            activeView === 'users' ? 'User Directory' :
+                                activeView === 'campaigns' ? 'Campaign Settings' : 'Dashboard'
+                    }</h1>
                     <div className="flex items-center gap-6">
                         <div className="text-xs font-bold text-gray-400 uppercase tracking-widest hidden sm:block">
                             {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
@@ -106,64 +137,71 @@ export default function AdminDashboard() {
                 </header>
 
                 <div className="p-10 space-y-10">
-                    {/* Stats Bar */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <AdminStatCard title="Total Revenue" value="Rp 127.4M" color="emerald" />
-                        <AdminStatCard title="Global Users" value="1,240" color="blue" />
-                        <AdminStatCard title="Live Bookings" value="48" color="amber" />
-                        <AdminStatCard title="Platform Margin" value="Rp 6.37M" color="purple" />
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                        {/* Settlement Queue */}
-                        <div className="lg:col-span-2 bg-white rounded-3xl border border-gray-200 p-8 shadow-sm">
-                            <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-xl font-black flex items-center gap-3 text-gray-900">
-                                    <CreditCard className="w-6 h-6 text-indigo-600" />
-                                    Forwarding Queue
-                                </h2>
-                                <button onClick={() => handleAction('Filter Settlements')} className="p-2 bg-gray-50 text-gray-400 hover:text-indigo-600 rounded-lg transition-colors">
-                                    <Filter className="w-4 h-4" />
-                                </button>
+                    {activeView === 'overview' && (
+                        <>
+                            {/* Stats Bar */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <AdminStatCard title="Total Revenue" value="Rp 127.4M" color="emerald" />
+                                <AdminStatCard title="Global Users" value="1,240" color="blue" />
+                                <AdminStatCard title="Live Bookings" value="48" color="amber" />
+                                <AdminStatCard title="Platform Margin" value="Rp 6.37M" color="purple" />
                             </div>
 
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between p-5 bg-gray-50 rounded-2xl border border-gray-100 group hover:border-indigo-200 transition-all shadow-sm">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 bg-white border border-gray-100 rounded-xl flex items-center justify-center shadow-inner font-black text-indigo-600">
-                                            V-01
-                                        </div>
-                                        <div>
-                                            <p className="font-bold text-gray-800 group-hover:text-indigo-700 transition-colors">Bali Golf Resort</p>
-                                            <p className="text-xs text-gray-400 font-medium">Ref: XND-502-AX9</p>
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                                {/* Settlement Queue */}
+                                <div className="lg:col-span-2 bg-white rounded-3xl border border-gray-200 p-8 shadow-sm">
+                                    <div className="flex items-center justify-between mb-8">
+                                        <h2 className="text-xl font-black flex items-center gap-3 text-gray-900">
+                                            <CreditCard className="w-6 h-6 text-indigo-600" />
+                                            Forwarding Queue
+                                        </h2>
+                                        <button onClick={() => handleAction('Filter Settlements')} className="p-2 bg-gray-50 text-gray-400 hover:text-indigo-600 rounded-lg transition-colors">
+                                            <Filter className="w-4 h-4" />
+                                        </button>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <div className="flex items-center justify-between p-5 bg-gray-50 rounded-2xl border border-gray-100 group hover:border-indigo-200 transition-all shadow-sm">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-12 h-12 bg-white border border-gray-100 rounded-xl flex items-center justify-center shadow-inner font-black text-indigo-600">
+                                                    V-01
+                                                </div>
+                                                <div>
+                                                    <p className="font-bold text-gray-800 group-hover:text-indigo-700 transition-colors">Bali Golf Resort</p>
+                                                    <p className="text-xs text-gray-400 font-medium">Ref: XND-502-AX9</p>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="font-black text-gray-900">Rp 2.450.000</p>
+                                                <button
+                                                    onClick={() => handleAction('Confirm Settlement Forward')}
+                                                    className="text-[10px] uppercase font-black tracking-widest text-indigo-600 bg-indigo-50 border border-indigo-100 px-3 py-1.5 rounded-lg mt-2 hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
+                                                >
+                                                    Confirm Forward
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="font-black text-gray-900">Rp 2.450.000</p>
-                                        <button
-                                            onClick={() => handleAction('Confirm Settlement Forward')}
-                                            className="text-[10px] uppercase font-black tracking-widest text-indigo-600 bg-indigo-50 border border-indigo-100 px-3 py-1.5 rounded-lg mt-2 hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
-                                        >
-                                            Confirm Forward
-                                        </button>
+                                </div>
+
+                                {/* Recent System Activity */}
+                                <div className="bg-white rounded-3xl border border-gray-200 p-8 shadow-sm flex flex-col">
+                                    <h2 className="text-xl font-black mb-8 flex items-center gap-3 text-gray-900">
+                                        <BarChart3 className="w-6 h-6 text-purple-600" />
+                                        Live Feed
+                                    </h2>
+                                    <div className="space-y-8 flex-1">
+                                        <FeedItem time="12:45 PM" user="Zoe" action="New Golf Booking" code="G-001" />
+                                        <FeedItem time="11:30 AM" user="Iwan" action="Hotel Verified" code="H-204" />
+                                        <FeedItem time="10:15 AM" user="Platform" action="System Sync Complete" />
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </>
+                    )}
 
-                        {/* Recent System Activity */}
-                        <div className="bg-white rounded-3xl border border-gray-200 p-8 shadow-sm flex flex-col">
-                            <h2 className="text-xl font-black mb-8 flex items-center gap-3 text-gray-900">
-                                <BarChart3 className="w-6 h-6 text-purple-600" />
-                                Live Feed
-                            </h2>
-                            <div className="space-y-8 flex-1">
-                                <FeedItem time="12:45 PM" user="Zoe" action="New Golf Booking" code="G-001" />
-                                <FeedItem time="11:30 AM" user="Iwan" action="Hotel Verified" code="H-204" />
-                                <FeedItem time="10:15 AM" user="Platform" action="System Sync Complete" />
-                            </div>
-                        </div>
-                    </div>
+                    {activeView === 'users' && <UsersManager />}
+                    {activeView === 'campaigns' && <CampaignsManager />}
                 </div>
             </main>
         </div>
