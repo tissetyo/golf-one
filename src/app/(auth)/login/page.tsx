@@ -10,79 +10,28 @@
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
-
-import { Suspense } from 'react';
+import { login } from '../actions';
+import { useTransition, Suspense } from 'react';
 
 function LoginContent() {
-    const router = useRouter();
     const searchParams = useSearchParams();
     const redirectPath = searchParams.get('redirect') || '/user';
-
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [isPending, startTransition] = useTransition();
     const [error, setError] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false);
 
-    /**
-     * Handle form submission for login.
-     */
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError(null);
-        setLoading(true);
 
-        const supabase = createClient();
+        const formData = new FormData(e.currentTarget);
+        formData.append('redirect', redirectPath);
 
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        });
-
-        if (signInError) {
-            setError(signInError.message);
-            setLoading(false);
-            return;
-        }
-
-        // Get user role to redirect appropriately
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('role')
-                .eq('id', user.id)
-                .single();
-
-            // Redirect based on role
-            const role = profile?.role || 'user';
-            let targetPath = redirectPath;
-
-            // If we are heading to a default path, use the role-specific dashboard
-            if (redirectPath === '/user' || redirectPath === '/chat') {
-                switch (role) {
-                    case 'admin':
-                        targetPath = '/admin';
-                        break;
-                    case 'golf_vendor':
-                        targetPath = '/golf-vendor';
-                        break;
-                    case 'hotel_vendor':
-                        targetPath = '/hotel-vendor';
-                        break;
-                    case 'travel_vendor':
-                        targetPath = '/travel-vendor';
-                        break;
-                    default:
-                        targetPath = '/user'; // Default for customers
-                }
+        startTransition(async () => {
+            const result = await login(formData);
+            if (result?.error) {
+                setError(result.error);
             }
-
-            router.push(targetPath);
-            router.refresh();
-        }
-
-        setLoading(false);
+        });
     };
 
     return (
@@ -113,9 +62,8 @@ function LoginContent() {
                     </label>
                     <input
                         id="email"
+                        name="email"
                         type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
                         required
                         className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-emerald-300/50 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all"
                         placeholder="you@example.com"
@@ -128,9 +76,8 @@ function LoginContent() {
                     </label>
                     <input
                         id="password"
+                        name="password"
                         type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
                         required
                         className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-emerald-300/50 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all"
                         placeholder="••••••••"
@@ -139,10 +86,10 @@ function LoginContent() {
 
                 <button
                     type="submit"
-                    disabled={loading}
+                    disabled={isPending}
                     className="w-full py-3 px-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-lg shadow-lg hover:from-emerald-600 hover:to-teal-600 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-emerald-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    {loading ? (
+                    {isPending ? (
                         <span className="flex items-center justify-center">
                             <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
