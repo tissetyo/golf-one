@@ -6,12 +6,14 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CreditCard, ArrowLeft, ShieldCheck, CheckCircle2, ChevronRight, Layout } from 'lucide-react';
 import Link from 'next/link';
 
-export default function TopUpPaymentPage() {
+export const dynamic = 'force-dynamic';
+
+function TopUpContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const amount = Number(searchParams.get('amount')) || 1000000;
@@ -95,6 +97,18 @@ export default function TopUpPaymentPage() {
                 </div>
             </main>
         </div>
+    );
+}
+
+export default function TopUpPaymentPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="w-16 h-16 border-4 border-emerald-100 border-t-emerald-600 rounded-full animate-spin"></div>
+            </div>
+        }>
+            <TopUpContent />
+        </Suspense>
     );
 }
 
