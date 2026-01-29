@@ -29,8 +29,10 @@ export default function AdminDashboard() {
                 return;
             }
 
-            const { data: p } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-            if (p?.role !== 'admin') {
+            const { data: p, error: pError } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+
+            if (pError || p?.role !== 'admin') {
+                console.log('User is not admin, redirecting to dashboard...', p?.role);
                 router.push('/user');
                 return;
             }

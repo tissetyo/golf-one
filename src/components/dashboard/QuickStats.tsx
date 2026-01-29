@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Wallet, Star, Plus, Gift, X, Check } from 'lucide-react';
 
 interface QuickStatsProps {
@@ -12,9 +13,10 @@ export default function QuickStats({ initialBalance, initialPoints }: QuickStats
     const [showTopUp, setShowTopUp] = useState(false);
     const [showPoints, setShowPoints] = useState(false);
     const [balance, setBalance] = useState(initialBalance);
+    const router = useRouter();
 
     const handleTopUp = (amount: number) => {
-        setBalance(prev => prev + amount);
+        router.push(`/user/top-up?amount=${amount}`);
         setShowTopUp(false);
     };
 
