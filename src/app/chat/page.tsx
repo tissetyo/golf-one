@@ -28,6 +28,12 @@ export default async function ChatPage() {
         .eq('id', user.id)
         .single();
 
+    // Role-based redirection
+    if (profile?.role === 'admin') redirect('/admin');
+    if (profile?.role?.includes('_vendor')) {
+        redirect(`/${profile.role.replace('_', '-')}`);
+    }
+
     // Get or create conversation
     const { data: conversations } = await supabase
         .from('conversations')

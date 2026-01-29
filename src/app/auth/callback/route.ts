@@ -28,7 +28,7 @@ export async function GET(request: Request) {
                     .single();
 
                 let redirectPath = next;
-                if (next === '/chat' || next === '/user') {
+                if (next === '/chat' || next === '/user' || next === '/') {
                     switch (profile?.role) {
                         case 'admin':
                             redirectPath = '/admin';

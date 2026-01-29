@@ -14,6 +14,19 @@ export default async function HomePage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  // Determine dashboard path based on role
+  let dashboardPath = '/user';
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (profile?.role === 'admin') dashboardPath = '/admin';
+    else if (profile?.role?.includes('_vendor')) dashboardPath = `/${profile.role.replace('_', '-')}`;
+  }
+
   // Get some featured courses for display
   const { data: featuredCourses } = await supabase
     .from('golf_courses')
@@ -39,7 +52,7 @@ export default async function HomePage() {
             <div className="flex items-center gap-4">
               {user ? (
                 <Link
-                  href="/user"
+                  href={dashboardPath}
                   className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-lg hover:from-emerald-600 hover:to-teal-600 transition-all"
                 >
                   Go to Dashboard
@@ -90,7 +103,7 @@ export default async function HomePage() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href={user ? '/user' : '/register'}
+              href={user ? dashboardPath : '/register'}
               className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-lg font-semibold rounded-xl hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg shadow-emerald-500/25"
             >
               Start Booking Now
@@ -268,7 +281,7 @@ export default async function HomePage() {
               Join thousands of golfers booking their perfect golf vacations through our AI-powered platform.
             </p>
             <Link
-              href={user ? '/user' : '/register'}
+              href={user ? dashboardPath : '/register'}
               className="inline-flex px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-lg font-semibold rounded-xl hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg shadow-emerald-500/25"
             >
               Start Your Journey
