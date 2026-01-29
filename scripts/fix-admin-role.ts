@@ -16,31 +16,38 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 async function repair() {
     console.log('--- Starting Admin Role Repair ---');
 
-    // 1. Find user in auth.users (via profiles helper)
-    const { data: profile, error: findError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('email', 'admin@golf.com')
-        .single();
+    // 1. Get user from auth.users to ensure we have the correct ID and email
+    const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();
 
-    if (findError || !profile) {
-        console.error('Error finding admin profile:', findError?.message || 'Profile not found');
+    if (listError) {
+        console.error('Error listing users:', listError.message);
+        return;
+    }
+
+    const adminUser = users.find(u => u.email === 'admin@golf.com');
+
+    if (!adminUser) {
+        console.error('User admin@golf.com not found in auth.users.');
         console.log('Suggestion: Please log out and register admin@golf.com first.');
         return;
     }
 
-    console.log(`Found profile: ${profile.full_name} (${profile.role})`);
+    console.log(`Found Auth User: ${adminUser.id} (${adminUser.email})`);
 
-    // 2. Force update role to admin
-    const { error: updateError } = await supabase
+    // 2. Upsert profile record
+    const { error: upsertError } = await supabase
         .from('profiles')
-        .update({ role: 'admin' })
-        .eq('id', profile.id);
+        .upsert({
+            id: adminUser.id,
+            email: adminUser.email,
+            full_name: 'System Admin',
+            role: 'admin'
+        }, { onConflict: 'id' });
 
-    if (updateError) {
-        console.error('Error updating role:', updateError.message);
+    if (upsertError) {
+        console.error('Error upserting profile:', upsertError.message);
     } else {
-        console.log(`SUCCESS: admin@golf.com is now officially an ADMIN.`);
+        console.log(`SUCCESS: admin@golf.com now has a profile record with role ADMIN.`);
     }
 
     console.log('--- Repair Complete ---');
