@@ -1,25 +1,20 @@
 /**
- * Supabase Middleware Client
+ * Supabase Middleware Client (Production-Stable)
  * 
- * Creates a Supabase client for Next.js middleware.
- * Handles session refresh and cookie updates.
+ * Standardized pattern for session refresh in Next.js Middleware.
+ * Ref: https://supabase.com/docs/guides/auth/server-side/nextjs
  */
 
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { type NextRequest, NextResponse } from 'next/server';
 
-/**
- * Updates the Supabase session in middleware.
- * This ensures the session is refreshed on each request.
- * 
- * @param request - Next.js request object
- * @returns Response with updated session cookies
- */
 export async function updateSession(request: NextRequest) {
+    // 1. Create an initial response
     let supabaseResponse = NextResponse.next({
         request,
     });
 
+    // 2. Initialize Supabase client with robust cookie handling
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -29,12 +24,17 @@ export async function updateSession(request: NextRequest) {
                     return request.cookies.getAll();
                 },
                 setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
+                    // Update request cookies for downstream components
                     cookiesToSet.forEach(({ name, value }) =>
                         request.cookies.set(name, value)
                     );
+
+                    // Re-initialize response to include the new cookies
                     supabaseResponse = NextResponse.next({
                         request,
                     });
+
+                    // Apply cookies to the response object
                     cookiesToSet.forEach(({ name, value, options }) =>
                         supabaseResponse.cookies.set(name, value, options)
                     );
@@ -43,12 +43,11 @@ export async function updateSession(request: NextRequest) {
         }
     );
 
-    // IMPORTANT: Do not write code between createServerClient and getUser()
-    // A simple mistake could make your app very slow!
-
+    // 3. getUser() - This is critical as it triggers session refresh/setAll
     const {
         data: { user },
     } = await supabase.auth.getUser();
 
-    return { supabaseResponse, user, supabase };
+    // 4. Return both the updated response (with valid cookies) and the user status
+    return { supabaseResponse, user };
 }
