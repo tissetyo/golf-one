@@ -57,9 +57,10 @@ export default async function UserDashboardPage() {
                     </div>
 
                     {/* Role indicator link for Admins/Vendors who land here */}
-                    {profile?.role && profile.role !== 'user' && (
-                        <Link href={profile.role === 'admin' ? '/admin' : `/${profile.role.replace('_', '-')}`} className="mx-4 px-3 py-1 bg-white/20 rounded-full text-[10px] font-black uppercase hover:bg-white/30 transition-all">
-                            Switch to {profile.role.replace('_', ' ')} Hub
+                    {/* HARDCODED SAFETY NET: If email is admin@golf.com, ALWAYS show link regardless of role logic */}
+                    {(user.email === 'admin@golf.com' || (profile?.role && profile.role !== 'user')) && (
+                        <Link href={user.email === 'admin@golf.com' ? '/admin' : `/${profile?.role?.replace('_', '-')}`} className="mx-4 px-3 py-1 bg-white/20 rounded-full text-[10px] font-black uppercase hover:bg-white/30 transition-all">
+                            Switch to {user.email === 'admin@golf.com' ? 'Admin' : profile?.role?.replace('_', ' ')} Hub
                         </Link>
                     )}
 
