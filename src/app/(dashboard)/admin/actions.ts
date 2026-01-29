@@ -3,6 +3,47 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 
+export async function uploadCampaignImage(formData: FormData) {
+    const supabase = await createClient();
+    const adminClient = await createAdminClient();
+
+    // Verify Admin
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: 'Unauthorized' };
+
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+    if (profile?.role !== 'admin') {
+        return { error: 'Unauthorized: Admin only' };
+    }
+
+    const file = formData.get('file') as File;
+    if (!file) return { error: 'No file uploaded' };
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 11)}.${fileExt}`;
+
+    // Upload using Admin Client
+    const { error } = await adminClient.storage
+        .from('campaigns')
+        .upload(fileName, file, {
+            contentType: file.type,
+            upsert: true
+        });
+
+    if (error) return { error: error.message };
+
+    const { data: { publicUrl } } = adminClient.storage
+        .from('campaigns')
+        .getPublicUrl(fileName);
+
+    return { url: publicUrl };
+}
+
 export async function saveCampaignTheme(theme: any) {
     const supabase = await createClient();
     const adminClient = await createAdminClient();

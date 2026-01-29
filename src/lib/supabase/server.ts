@@ -47,7 +47,14 @@ export async function createClient() {
 /**
  * Creates a Supabase admin client with service role key.
  */
-export async function createAdminClient() {
+/**
+ * Creates a Supabase admin client with service role key.
+ * Uses vanilla @supabase/supabase-js to ensure NO cookies/session are used.
+ * This guarantees a pure "Service Role" supersedes RLS.
+ */
+import { createClient as createVanillaClient } from '@supabase/supabase-js';
+
+export async function createAdminClient() { // async to keep signature compatible
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -56,26 +63,10 @@ export async function createAdminClient() {
         return {} as any;
     }
 
-    const cookieStore = await cookies();
-
-    return createServerClient(
-        supabaseUrl,
-        serviceRoleKey,
-        {
-            cookies: {
-                getAll() {
-                    return cookieStore.getAll();
-                },
-                setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
-                    try {
-                        cookiesToSet.forEach(({ name, value, options }) =>
-                            cookieStore.set(name, value, options)
-                        );
-                    } catch {
-                        // Ignore in Server Components
-                    }
-                },
-            },
+    return createVanillaClient(supabaseUrl, serviceRoleKey, {
+        auth: {
+            autoRefreshToken: false,
+            persistSession: false
         }
-    );
+    });
 }

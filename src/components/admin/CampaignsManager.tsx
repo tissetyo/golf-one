@@ -52,21 +52,16 @@ export default function CampaignsManager() {
     };
 
     const uploadFile = async (file: File) => {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 11)}.${fileExt}`;
-        const filePath = `${fileName}`;
+        // Create FormData to send file to server action
+        const formData = new FormData();
+        formData.append('file', file);
 
-        const { error: uploadError } = await supabase.storage
-            .from('campaigns')
-            .upload(filePath, file);
+        // Use Server Action for consistent Admin access (bypassing Client RLS)
+        const { uploadCampaignImage } = await import('@/app/(dashboard)/admin/actions');
+        const result = await uploadCampaignImage(formData);
 
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-            .from('campaigns')
-            .getPublicUrl(filePath);
-
-        return publicUrl;
+        if (result.error) throw new Error(result.error);
+        return result.url;
     };
 
     const handleSaveSettings = async () => {
