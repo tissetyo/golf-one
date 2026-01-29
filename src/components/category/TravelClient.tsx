@@ -11,6 +11,7 @@ import { useBooking } from '@/components/booking/BookingProvider';
 import { Map, MapPin, Clock, Check, ShieldCheck, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import CategoryHeader from './CategoryHeader';
+import QuickFilters from './QuickFilters';
 
 interface TravelClientProps {
     initialPackages: any[];
@@ -39,6 +40,8 @@ export default function TravelClient({ initialPackages }: TravelClientProps) {
                 icon={<Map className="w-5 h-5 lg:w-7 lg:h-7 text-orange-600" />}
                 colorClass="bg-orange-50"
             />
+
+            <QuickFilters category="travel" />
 
             {/* Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-8">

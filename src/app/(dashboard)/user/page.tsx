@@ -8,6 +8,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import ServiceGrid from '@/components/dashboard/ServiceGrid';
+import QuickStats from '@/components/dashboard/QuickStats';
 import { Trophy, Calendar, MapPin, ChevronRight, Star, Search, Wallet, Bell, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
@@ -73,28 +74,7 @@ export default async function UserDashboardPage() {
             </header>
 
             {/* Quick Status Bar */}
-            <div className="px-5 -mt-4 relative z-40">
-                <div className="bg-white rounded-[32px] p-1 border border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.08)] flex items-center">
-                    <div className="flex-1 px-6 py-4 flex items-center gap-3 border-r border-gray-50">
-                        <div className="w-8 h-8 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600">
-                            <Wallet className="w-4 h-4" />
-                        </div>
-                        <div>
-                            <p className="text-[9px] font-black uppercase text-gray-400 tracking-tighter">Balance</p>
-                            <p className="text-xs font-black">Rp 12.5M</p>
-                        </div>
-                    </div>
-                    <div className="flex-1 px-6 py-4 flex items-center gap-3">
-                        <div className="w-8 h-8 bg-amber-50 rounded-full flex items-center justify-center text-amber-600">
-                            <Star className="w-4 h-4 fill-current text-amber-400" />
-                        </div>
-                        <div>
-                            <p className="text-[9px] font-black uppercase text-gray-400 tracking-tighter">Points</p>
-                            <p className="text-xs font-black">2,450</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <QuickStats initialBalance={12500000} initialPoints={2450} />
 
             <main className="max-w-7xl mx-auto px-6 mt-12 space-y-12">
                 {/* Service Grid */}

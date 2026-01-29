@@ -12,6 +12,7 @@ import { useBooking } from '@/components/booking/BookingProvider';
 import { Flag, MapPin, Star, MoreVertical, Clock, Check } from 'lucide-react';
 import Link from 'next/link';
 import CategoryHeader from './CategoryHeader';
+import QuickFilters from './QuickFilters';
 
 interface GolfCoursesClientProps {
     initialCourses: any[];
@@ -43,6 +44,8 @@ export default function GolfCoursesClient({ initialCourses }: GolfCoursesClientP
                 icon={<Flag className="w-5 h-5 lg:w-7 lg:h-7 text-emerald-600" />}
                 colorClass="bg-emerald-50"
             />
+
+            <QuickFilters category="golf" />
 
             {/* Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-8">
