@@ -58,7 +58,8 @@ function LoginContent() {
             const role = profile?.role || 'user';
             let targetPath = redirectPath;
 
-            if (redirectPath === '/chat') {
+            // If we are heading to a default path, use the role-specific dashboard
+            if (redirectPath === '/user' || redirectPath === '/chat') {
                 switch (role) {
                     case 'admin':
                         targetPath = '/admin';
@@ -72,6 +73,8 @@ function LoginContent() {
                     case 'travel_vendor':
                         targetPath = '/travel-vendor';
                         break;
+                    default:
+                        targetPath = '/user'; // Default for customers
                 }
             }
 

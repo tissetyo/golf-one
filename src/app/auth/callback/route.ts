@@ -28,7 +28,7 @@ export async function GET(request: Request) {
                     .single();
 
                 let redirectPath = next;
-                if (next === '/chat') {
+                if (next === '/chat' || next === '/user') {
                     switch (profile?.role) {
                         case 'admin':
                             redirectPath = '/admin';
@@ -42,6 +42,8 @@ export async function GET(request: Request) {
                         case 'travel_vendor':
                             redirectPath = '/travel-vendor';
                             break;
+                        default:
+                            redirectPath = '/user'; // Default for customers
                     }
                 }
 
